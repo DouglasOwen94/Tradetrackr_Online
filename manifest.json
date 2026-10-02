@@ -1,0 +1,15 @@
+{
+  "name": "TradeTrackr — Trade Journal",
+  "short_name": "TradeTrackr",
+  "description": "A lean trading journal. Log trades, track PnL, review your stats.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0c0a07",
+  "theme_color": "#14100a",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
