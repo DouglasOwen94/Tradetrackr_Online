@@ -28,7 +28,8 @@
   --nav-h:76px;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{font-size:16px}
+[hidden]{display:none!important}
+html{font-size:16px;background:#0c0a07}
 body{
   font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
   color:var(--ink-dark);
@@ -320,6 +321,153 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:40;display:flex;justify-conte
 /* toast */
 #toast{position:fixed;left:50%;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 20px);transform:translateX(-50%) translateY(8px);background:#241d10;border:1px solid var(--gold-line);color:var(--ink);padding:11px 20px;border-radius:var(--r-sm);font-size:.85rem;font-weight:600;opacity:0;transition:all .2s;z-index:80;pointer-events:none;box-shadow:0 10px 26px -8px rgba(0,0,0,.8);white-space:nowrap}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* ---------- sync status ---------- */
+.sync-pill{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:999px;background:var(--glass);border:1px solid var(--glass-line);font-size:.66rem;font-weight:700;letter-spacing:.04em;color:var(--ink-faint);text-transform:uppercase}
+.sync-pill svg{width:14px;height:14px;stroke:currentColor}
+.sync-pill .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.sync-pill.ok{color:var(--green)} .sync-pill.busy{color:var(--gold-1)} .sync-pill.warn{color:var(--gold-1)} .sync-pill.err{color:var(--red)}
+.sync-pill.busy .dot{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.25}}
+.sync-status{font-size:.8rem;font-weight:600;margin:2px 0 12px;display:flex;align-items:center;gap:8px}
+.sync-status .dot{width:8px;height:8px;border-radius:50%;flex:none}
+
+/* ---------- taken / missed switch ---------- */
+.kind-seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--glass-line);margin-top:16px}
+.kind-seg button{padding:11px 8px;border-radius:9px;font-weight:700;font-size:.88rem;color:var(--ink-faint);display:flex;align-items:center;justify-content:center;gap:7px}
+.kind-seg button svg{width:16px;height:16px;stroke:currentColor}
+.kind-seg button.on{background:linear-gradient(150deg,var(--gold-1),var(--gold-2));color:#1c1506}
+.kind-seg button.on.missed{background:rgba(224,184,90,.14);color:var(--gold-1);box-shadow:inset 0 0 0 1px rgba(224,184,90,.5)}
+.missed-note{font-size:.76rem;color:var(--ink-faint);line-height:1.5;margin:10px 2px 0}
+.optional{text-transform:none;font-weight:500;color:var(--ink-faint);letter-spacing:0}
+.calc.missed{border-style:dashed}
+
+/* missed rows, markers */
+.trade-row.missed{background:rgba(255,255,255,.025);border:1px dashed rgba(224,184,90,.35)}
+.dir-badge.missed{background:rgba(224,184,90,.12);color:var(--gold-1)}
+.trade-row .pnl small.would{display:block;font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 2px}
+.trade-row .pnl.none{color:var(--ink-faint)}
+.reason{font-size:.68rem;font-weight:700;color:var(--gold-1)}
+.cal-cell{position:relative}
+.cal-cell .mk{position:absolute;top:4px;left:4px;width:7px;height:7px;border-radius:50%;background:var(--gold-1);font-size:0;color:var(--gold-1);font-weight:800;text-align:center}
+.cal-cell.missed-only{background:rgba(224,184,90,.05);border:1px dashed rgba(224,184,90,.45)}
+.cal-cell.missed-only .c{color:var(--gold-1)}
+.cal-legend{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;font-size:.7rem;color:var(--ink-faint);margin:12px 4px 0}
+.cal-legend span{display:inline-flex;align-items:center;gap:6px}
+.cal-legend i{display:inline-block;width:12px;height:12px;border-radius:3px}
+.sub-head{font-size:.72rem;font-weight:700;color:var(--gold-1);text-transform:uppercase;letter-spacing:.08em;margin:18px 2px 8px;display:flex;justify-content:space-between}
+.reason-row{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:.78rem}
+.reason-row .lab{flex:0 0 46%;color:var(--ink-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reason-row .bar{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.06);overflow:hidden}
+.reason-row .bar i{display:block;height:100%;background:var(--gold-2);border-radius:3px}
+.reason-row b{min-width:22px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* ---------- screenshots ---------- */
+.shots{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.shot{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:rgba(255,255,255,.05);border:1px solid var(--glass-line)}
+.shot img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .2s}
+.shot img.ready{opacity:1}
+.shot .rm{position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:50%;background:rgba(10,8,4,.75);display:flex;align-items:center;justify-content:center}
+.shot .rm svg{width:13px;height:13px;stroke:#fff}
+.shot .open{position:absolute;inset:0}
+.shot.add{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border-style:dashed;color:var(--ink-dark-dim);font-size:.72rem;font-weight:600}
+.shot.add svg{width:20px;height:20px;stroke:currentColor}
+.shot .busy{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.66rem;color:var(--ink-faint)}
+.row-thumbs{display:flex;gap:5px;margin-top:7px}
+.row-thumbs span{width:46px;height:34px;border-radius:5px;overflow:hidden;background:rgba(255,255,255,.06);flex:none}
+.row-thumbs img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .2s}
+.row-thumbs img.ready{opacity:1}
+.row-thumbs em{font-style:normal;font-size:.66rem;color:var(--ink-faint);align-self:center}
+#viewer{position:fixed;inset:0;z-index:90;background:rgba(5,4,2,.94);display:none;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top) + 50px) 12px calc(env(safe-area-inset-bottom) + 50px)}
+#viewer.open{display:flex}
+#viewer img{max-width:100%;max-height:100%;object-fit:contain;border-radius:6px}
+#viewer .vx{position:absolute;top:calc(env(safe-area-inset-top) + 10px);right:12px;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center}
+#viewer .vx svg{width:18px;height:18px;stroke:#fff}
+#viewer .vnav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center}
+#viewer .vnav svg{width:20px;height:20px;stroke:#fff}
+#viewer .vprev{left:12px} #viewer .vnext{right:12px}
+#viewer .vcount{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 16px);left:0;right:0;text-align:center;font-size:.75rem;color:var(--ink-dim);font-weight:600}
+#viewer .vmsg{color:var(--ink-dim);font-size:.85rem}
+
+.nav-add-label{display:none}
+.add-grid,.stats-cols,.cal-layout{display:block}
+
+/* ---------- tablet (iPad portrait) ---------- */
+@media (min-width:700px) and (max-width:1023px){
+  #app{max-width:760px;padding-left:28px;padding-right:28px}
+  .nav-inner{max-width:580px}
+  .sheet{max-width:640px}
+  .cal-grid{gap:6px}
+  .cal-cell,.cal-week{min-height:74px;padding-top:7px}
+  .cal-cell .d,.cal-week .d{font-size:.72rem}
+  .cal-cell .p,.cal-week .p{font-size:.8rem;margin-top:6px}
+  .cal-cell .c,.cal-week .c{font-size:.62rem}
+  .cal-h{font-size:.66rem}
+  .cal-cell .mk{width:auto;height:15px;min-width:15px;padding:0 3px;border-radius:8px;background:transparent;border:1px dashed var(--gold-1);font-size:.56rem;line-height:13px;top:5px;left:5px}
+  .shots{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+}
+
+/* ---------- iPad landscape + desktop ---------- */
+@media (min-width:1024px){
+  :root{--rail-w:224px}
+  body{padding-left:var(--rail-w)}
+  #app{max-width:1200px;padding:24px 40px 56px}
+  .hdr{padding:4px 2px 22px}
+  nav{top:0;bottom:0;left:0;right:auto;width:var(--rail-w);display:block}
+  .nav-inner{margin:16px 0 16px 16px;width:calc(var(--rail-w) - 16px);height:calc(100% - 32px);max-width:none;display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:18px 12px;border-radius:18px}
+  .nav-item{flex-direction:row;gap:12px;padding:12px 14px;font-size:.9rem;border-radius:10px;justify-content:flex-start}
+  .nav-item svg{width:19px;height:19px}
+  .nav-item.on{background:rgba(224,184,90,.12)}
+  .nav-item:hover{background:rgba(255,255,255,.05)}
+  .nav-add{order:-1;margin:0 0 14px}
+  .nav-add button{transform:none;width:100%;height:48px;border-radius:12px;gap:8px}
+  .nav-add svg{width:19px;height:19px}
+  .nav-add-label{display:inline;font-weight:800;font-size:.92rem;color:#1c1506}
+  #toast{left:calc(50% + var(--rail-w)/2);bottom:28px}
+  .sheet-backdrop{align-items:center;padding:24px}
+  .sheet{max-width:620px;border-radius:18px;border:1px solid var(--gold-line);max-height:88vh;padding-bottom:26px;transform:translateY(12px) scale(.98)}
+  .sheet-backdrop.open .sheet{transform:none}
+  .grab{padding:8px 0 10px;cursor:default}
+  .grab::before{display:none}
+  #viewer{left:0}
+  button:hover{filter:brightness(1.08)}
+  .trade-row:hover{border-color:rgba(224,184,90,.45)}
+  .cal-cell[data-day]{cursor:pointer}
+  .cal-cell[data-day]:hover{outline:1px solid rgba(224,184,90,.5)}
+
+  /* calendar: big grid + month summary on the right */
+  .cal-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items:start}
+  .cal-side{position:sticky;top:24px}
+  .cal-grid{gap:8px}
+  .cal-cell,.cal-week{min-height:96px;padding:10px 4px 8px;border-radius:9px}
+  .cal-cell .d,.cal-week .d{font-size:.78rem}
+  .cal-cell .p,.cal-week .p{font-size:.98rem;margin-top:10px}
+  .cal-cell .c,.cal-week .c{font-size:.68rem;margin-top:3px}
+  .cal-h{font-size:.72rem;padding:6px 0}
+  .cal-cell .mk{top:7px;left:7px;width:auto;height:16px;min-width:16px;padding:0 3px;line-height:14px;font-size:.6rem;border-radius:8px;background:transparent;border:1px dashed var(--gold-1)}
+
+  /* stats: two columns */
+  .stats-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+  .stats-cols > div{min-width:0}
+
+  /* add trade: form left, calculator right */
+  .add-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(330px,.85fr);gap:32px;align-items:start}
+  .add-side{position:sticky;top:20px}
+  .add-side > .section-label:first-child{margin-top:18px}
+  .keypad button{height:58px}
+  .shots{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+
+  /* history: comfortable reading width */
+  #view-history{max-width:860px}
+
+  /* settings: two columns of cards */
+  .settings-cols{columns:2;column-gap:20px}
+  .settings-cols > .card-glass{break-inside:avoid;display:inline-block;width:100%}
+}
+@media (min-width:1400px){
+  #app{max-width:1280px}
+  .cal-layout{grid-template-columns:minmax(0,1fr) 340px}
+}
+
 
 .view{display:none;animation:fade .18s ease}
 .view.on{display:block}
@@ -341,6 +489,7 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:40;display:flex;justify-conte
     <svg class="logo" viewBox="0 0 32 32" clip-rule="evenodd" fill-rule="evenodd"><defs><linearGradient id="logoGold" gradientTransform="matrix(32 32 -32 32 288 0)" gradientUnits="userSpaceOnUse" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#f0cf7c"/><stop offset="1" stop-color="#c8992f"/></linearGradient></defs><g transform="translate(-288)"><path d="m313.5 16.009c-.51.047-.99.27-1.356.635-.412.413-.644.973-.644 1.556v5.6c0 .583.232 1.143.644 1.556.366.365.846.588 1.356.635v1.009c0 .552.448 1 1 1s1-.448 1-1v-1.009c.51-.047.99-.27 1.356-.635.412-.413.644-.973.644-1.556 0-1.51 0-4.09 0-5.6 0-.583-.232-1.143-.644-1.556-.366-.365-.846-.588-1.356-.635v-1.009c0-.552-.448-1-1-1s-1 .448-1 1zm-14-2.25c-1.121.101-2 1.043-2 2.191v6.85c0 1.148.879 2.09 2 2.191v1.009c0 .552.448 1 1 1s1-.448 1-1v-1.009c1.121-.101 2-1.043 2-2.191v-6.85c0-1.148-.879-2.09-2-2.191v-.759c0-.552-.448-1-1-1s-1 .448-1 1zm7-2.75c-.51.047-.99.27-1.356.635-.412.413-.644.973-.644 1.556v6.6c0 .583.232 1.143.644 1.556.366.365.846.588 1.356.635v1.009c0 .552.448 1 1 1s1-.448 1-1v-1.009c.51-.047.99-.27 1.356-.635.412-.413.644-.973.644-1.556 0-1.722 0-4.878 0-6.6 0-.583-.232-1.143-.644-1.556-.366-.365-.846-.588-1.356-.635v-1.009c0-.552-.448-1-1-1s-1 .448-1 1zm-14-5c-1.121.101-2 1.043-2 2.191v11.6c0 1.148.879 2.09 2 2.191v1.009c0 .552.448 1 1 1s1-.448 1-1v-1.009c1.121-.101 2-1.043 2-2.191v-11.6c0-1.148-.879-2.09-2-2.191v-1.009c0-.552-.448-1-1-1s-1 .448-1 1zm14 13.791v-6.6c0-.053.021-.104.059-.141.037-.038.088-.059.141-.059h1.6c.053 0 .104.021.141.059.038.037.059.088.059.141v6.6c0 .053-.021.104-.059.141-.037.038-.088.059-.141.059-.506 0-1.094 0-1.6 0-.053 0-.104-.021-.141-.059-.038-.037-.059-.088-.059-.141zm-14-11.6c0-.11.09-.2.2-.2h1.6c.11 0 .2.09.2.2v11.6c0 .11-.09.2-.2.2-.506 0-1.094 0-1.6 0-.11 0-.2-.09-.2-.2z" fill="url(#logoGold)"/></g></svg>
     <span class="brand">TradeTrackr</span>
     <span class="spacer"></span>
+    <button class="sync-pill" id="sync-pill" hidden aria-label="Sync status"><span class="dot"></span><span id="sync-pill-txt">Sync</span></button>
     <span class="hdr-date" id="hdr-date"></span>
   </header>
 
@@ -371,8 +520,9 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:40;display:flex;justify-conte
       <span>Stats</span>
     </button>
     <div class="nav-add">
-      <button data-nav="add" aria-label="Add trade">
+      <button data-nav="add" aria-label="Add entry">
         <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span class="nav-add-label">Add entry</span>
       </button>
     </div>
     <button class="nav-item" data-nav="history">
@@ -391,12 +541,22 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:40;display:flex;justify-conte
 </div>
 <div id="toast" role="status"></div>
 <input type="file" id="import-file" accept=".json,application/json" hidden>
+<input type="file" id="img-file" accept="image/*" multiple hidden>
+<div id="viewer" role="dialog" aria-modal="true" aria-label="Screenshot">
+  <button class="vx" id="v-close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <button class="vnav vprev" id="v-prev" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+  <img id="v-img" alt="">
+  <span class="vmsg" id="v-msg" hidden>Loading…</span>
+  <button class="vnav vnext" id="v-next" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+  <div class="vcount" id="v-count"></div>
+</div>
 
 <script>
 /* ============================================================
    TradeTrackr — lean trading journal (local-first PWA)
    ============================================================ */
-const LS_KEY = 'tradetrackr_v1';
+const LS_KEY = 'tradetrackr_online_v1';
+const LS_KEY_OLD = 'tradetrackr_v1'; /* the original app's key: copied over once if found on this device */
 const uid = () => Math.random().toString(36).slice(2, 9) + Date.now().toString(36);
 const todayISO = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); };
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -435,28 +595,56 @@ const PIP_SIZE = { XAUUSD: 0.1 };
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MONTHS_S = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
+/* Why a missed trade wasn't taken */
+const MISSED_REASONS = [
+  ['fear','Hesitated / scared'],
+  ['unsure','Not sure of setup'],
+  ['away','Away from screen'],
+  ['ran','Price ran without me'],
+  ['other','Other']
+];
+const reasonLabel = k => (MISSED_REASONS.find(r=>r[0]===k)||[null,'No reason given'])[1];
+
+function blankState(){
+  return { v:3, accounts:[], assets:[...DEFAULT_ASSETS], tags:[...DEFAULT_TAGS], tagGroups:{}, trades:[], missed:[], txns:[], settings:{ defaultAccountId:null, defaultAsset:'XAUUSD', beThreshold:0, lastBackupAt:null } };
+}
+/* Fill in anything an older or partial copy is missing. Returns null if it isn't a journal. */
+function normalize(d){
+  if(!d || !Array.isArray(d.accounts)) return null;
+  d.settings = d.settings||{};
+  if(d.settings.beThreshold==null) d.settings.beThreshold = 0;
+  if(d.settings.lastBackupAt===undefined) d.settings.lastBackupAt = null;
+  if(!Array.isArray(d.assets)) d.assets = [...DEFAULT_ASSETS];
+  if(!Array.isArray(d.tags)) d.tags = [...DEFAULT_TAGS];
+  if(!Array.isArray(d.trades)) d.trades = [];
+  if(!Array.isArray(d.missed)) d.missed = [];
+  if(!Array.isArray(d.txns)) d.txns = [];
+  if(fillTagGroups(d) && d.tags.some(tg=>d.tagGroups[tg]!=='other')) d.settings.tagGroupsToReview = true;
+  d.trades.forEach(t=>{ if(!Array.isArray(t.tags)) t.tags = []; if(!Array.isArray(t.images)) t.images = []; });
+  d.missed.forEach(t=>{ t.missed = true; if(!Array.isArray(t.tags)) t.tags = []; if(!Array.isArray(t.images)) t.images = []; if(!Array.isArray(t.layers)) t.layers = []; });
+  d.accounts.forEach(a=>{ if(a.monthlyGoal==null) a.monthlyGoal = 0; });
+  d.v = 3; /* schema version for safe future migrations */
+  return d;
+}
 let S = load();
 function load(){
   try{
-    const raw = localStorage.getItem(LS_KEY);
-    if(raw){
-      const d = JSON.parse(raw);
-      if(d && Array.isArray(d.accounts)){
-        d.settings = d.settings||{};
-        if(d.settings.beThreshold==null) d.settings.beThreshold = 0;
-        if(d.settings.lastBackupAt===undefined) d.settings.lastBackupAt = null;
-        if(!Array.isArray(d.tags)) d.tags = [...DEFAULT_TAGS];
-        if(fillTagGroups(d) && d.tags.some(tg=>d.tagGroups[tg]!=='other')) d.settings.tagGroupsToReview = true;
-        d.trades.forEach(t=>{ if(!Array.isArray(t.tags)) t.tags = []; });
-        d.accounts.forEach(a=>{ if(a.monthlyGoal==null) a.monthlyGoal = 0; });
-        d.v = 2; /* schema version for safe future migrations */
-        return d;
-      }
+    let raw = localStorage.getItem(LS_KEY);
+    if(!raw && !localStorage.getItem('tt_migrated')){
+      const old = localStorage.getItem(LS_KEY_OLD);
+      if(old){ raw = old; try{ localStorage.setItem(LS_KEY, old); }catch(e){} }
+      try{ localStorage.setItem('tt_migrated','1'); }catch(e){}
     }
+    if(raw){ const d = normalize(JSON.parse(raw)); if(d) return d; }
   }catch(e){}
-  return { v:2, accounts:[], assets:[...DEFAULT_ASSETS], tags:[...DEFAULT_TAGS], tagGroups:{}, trades:[], txns:[], settings:{ defaultAccountId:null, defaultAsset:'XAUUSD', beThreshold:0, lastBackupAt:null } };
+  return blankState();
 }
-function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){ toast('Could not save — storage full'); } }
+/* Write to this device only */
+function saveLocal(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); return true; }catch(e){ toast('Could not save — storage full'); return false; } }
+/* Write to this device, then queue an upload */
+function save(){ saveLocal(); syncChanged(); }
+/* Find a trade or missed entry by id */
+const entryById = id => S.trades.find(x=>x.id===id) || S.missed.find(x=>x.id===id) || null;
 
 /* ---------- ui state ---------- */
 const now = new Date();
@@ -469,6 +657,8 @@ let UI = {
 };
 
 /* ---------- helpers ---------- */
+const WIDE = window.matchMedia('(min-width:1024px)');
+const isWide = () => WIDE.matches;
 const acct = id => S.accounts.find(a=>a.id===id);
 const defAcct = () => acct(S.settings.defaultAccountId) || S.accounts[0] || null;
 function money(n, sign){
@@ -524,7 +714,10 @@ const I = {
   hash:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>',
   scale:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M5 7l7-4 7 4"/><path d="M2 13l3-6 3 6a3 3 0 0 1-6 0Z"/><path d="M16 13l3-6 3 6a3 3 0 0 1-6 0Z"/></svg>',
   book:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>',
-  star:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linejoin="round"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1Z"/></svg>'
+  star:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linejoin="round"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1Z"/></svg>',
+  eye:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>',
+  img:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
+  cloud:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 1 0-1.4-8.8A6 6 0 0 0 4 12.5 3.5 3.5 0 0 0 6.5 19Z"/></svg>'
 };
 
 /* ============================================================
@@ -557,6 +750,15 @@ function renderCalendar(){
   }
   const monthPnl = Object.values(days).reduce((s,d)=>s+d.pnl,0);
   const monthN = Object.values(days).reduce((s,d)=>s+d.n,0);
+  /* missed trades: marked on the day, never added to PnL */
+  const mdays = {};
+  for(const t of S.missed){
+    if(t.accountId!==aid || !inMonth(t.date,y,m)) continue;
+    const d = +t.date.split('-')[2];
+    (mdays[d] = mdays[d] || {n:0}).n++;
+  }
+  const missedMonth = Object.values(mdays).reduce((s,d)=>s+d.n,0);
+  const wide = isWide();
 
   const daysInMonth = new Date(y, m+1, 0).getDate();
   const firstDow = (new Date(y, m, 1).getDay() + 6) % 7; /* Monday = 0 */
@@ -565,15 +767,20 @@ function renderCalendar(){
   let week = {pnl:0,n:0}, weekNo = 1, col = 0;
   for(let i=0;i<firstDow;i++){ cells += `<div class="cal-cell blank"></div>`; col++; }
   for(let d=1; d<=daysInMonth; d++){
-    const dd = days[d];
+    const dd = days[d], md = mdays[d];
     const iso = y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
     const isToday = iso===tISO;
+    const mk = md ? `<span class="mk" aria-label="${md.n} missed">${md.n}</span>` : '';
     if(dd){
       week.pnl += dd.pnl; week.n += dd.n;
       const thr = Math.abs(S.settings.beThreshold||0);
       const kind = dd.pnl>thr?'pos':dd.pnl<-thr?'neg':'flat';
       cells += `<button class="cal-cell ${kind} ${isToday?'today':''}" data-day="${iso}">
-        <span class="d">${d}</span><span class="p">${kfmt(dd.pnl)}</span><span class="c">${dd.n} trade${dd.n===1?'':'s'}</span>
+        <span class="d">${d}</span><span class="p">${kfmt(dd.pnl)}</span><span class="c">${dd.n} trade${dd.n===1?'':'s'}</span>${mk}
+      </button>`;
+    } else if(md){
+      cells += `<button class="cal-cell missed-only ${isToday?'today':''}" data-day="${iso}">
+        <span class="d">${d}</span><span class="p" style="color:var(--gold-1)">—</span><span class="c">${md.n} missed</span>
       </button>`;
     } else {
       cells += `<div class="cal-cell ${isToday?'today':''}"><span class="d">${d}</span></div>`;
@@ -589,7 +796,7 @@ function renderCalendar(){
     }
   }
 
-  el.innerHTML = `
+  const head = `
   <div class="label-row" style="display:flex;align-items:center;justify-content:space-between;margin:2px 2px 12px">
     <h2 style="font-size:1.3rem">Calendar</h2>
     ${S.accounts.length>1?`<div class="acct-select" style="--_:0">
@@ -598,23 +805,44 @@ function renderCalendar(){
       </select>
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="stroke:#ece5d1;position:absolute;right:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;pointer-events:none"><polyline points="6 9 12 15 18 9"/></svg>
     </div>`:`<span style="font-size:.8rem;font-weight:700;color:var(--ink-dim)">${esc(acct(aid).name)}</span>`}
-  </div>
-
+  </div>`;
+  const monthRow = `
   <div class="month-row">
     <button class="m-btn" id="cal-prev" aria-label="Previous month">${I.chevL}</button>
     <span class="m-label">${MONTHS[m]} ${y}</span>
     <button class="m-btn" id="cal-next" aria-label="Next month" ${isCurrent?'disabled':''}>${I.chevR}</button>
-  </div>
-
-  <div class="card-navy" style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center">
-    <div><div style="font-size:.68rem;color:var(--ink-dim)">Monthly PnL</div>
-    <div style="font-size:1.25rem;font-weight:700;color:${monthPnl>0?'var(--green)':monthPnl<0?'var(--red)':'var(--ink)'}">${money(monthPnl,true)}</div></div>
-    <div style="text-align:right"><div style="font-size:.68rem;color:var(--ink-dim)">Trades</div>
-    <div style="font-size:1.25rem;font-weight:700">${monthN}</div></div>
-  </div>
-
-  <div class="cal-grid">${cells}</div>
-  ${monthN?`<p style="font-size:.72rem;color:var(--ink-dark-dim);margin:12px 4px 0;text-align:center">Tap a traded day to review it.</p>`:''}`;
+  </div>`;
+  const lab = s => `<div style="font-size:.68rem;color:var(--ink-dim)">${s}</div>`;
+  const summary = `
+  <div class="card-navy" style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px">
+    <div>${lab('Monthly PnL')}
+    <div class="cal-sum" style="font-size:1.25rem;font-weight:700;color:${monthPnl>0?'var(--green)':monthPnl<0?'var(--red)':'var(--ink)'}">${money(monthPnl,true)}</div></div>
+    <div style="text-align:center">${lab('Trades')}
+    <div class="cal-sum" style="font-size:1.25rem;font-weight:700">${monthN}</div></div>
+    <div style="text-align:right">${lab('Missed')}
+    <div class="cal-sum" style="font-size:1.25rem;font-weight:700;color:${missedMonth?'var(--gold-1)':'var(--ink-faint)'}">${missedMonth}</div></div>
+  </div>`;
+  /* wide screens: a few more numbers beside the calendar */
+  let extra = '';
+  if(wide){
+    const dvals = Object.entries(days).map(([d,v])=>({d:+d, pnl:v.pnl}));
+    const best = dvals.length ? dvals.reduce((a,b)=> b.pnl>a.pnl?b:a) : null;
+    const worst = dvals.length ? dvals.reduce((a,b)=> b.pnl<a.pnl?b:a) : null;
+    const mt = monthTrades(aid,y,m);
+    const wr = mt.length ? Math.round(mt.filter(t=>classify(t)==='win').length/mt.length*100) : null;
+    const row = (k,v,c) => `<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.82rem"><span style="color:var(--ink-dim)">${k}</span><b class="cal-sum" style="color:${c||'var(--ink)'}">${v}</b></div>`;
+    extra = `<div class="card-navy" style="padding:8px 16px 10px">
+      ${row('Win rate', wr===null?'—':wr+'%')}
+      ${row('Days traded', dvals.length)}
+      ${row('Best day', best ? best.d+' '+MONTHS_S[m].charAt(0)+MONTHS_S[m].slice(1).toLowerCase()+' · '+money(best.pnl,true) : '—', best&&best.pnl>0?'var(--green)':null)}
+      ${row('Worst day', worst ? worst.d+' '+MONTHS_S[m].charAt(0)+MONTHS_S[m].slice(1).toLowerCase()+' · '+money(worst.pnl,true) : '—', worst&&worst.pnl<0?'var(--red)':null)}
+    </div>`;
+  }
+  const legend = missedMonth ? `<div class="cal-legend"><span><i style="border:1px dashed var(--gold-1)"></i>${wide?'':'<i style="width:7px;height:7px;border-radius:50%;background:var(--gold-1)"></i>'}Missed trade (not counted)</span></div>` : '';
+  const hint = (monthN||missedMonth) ? `<p style="font-size:.72rem;color:var(--ink-dark-dim);margin:10px 4px 0;text-align:center">${wide?'Click':'Tap'} a day to review it.</p>` : '';
+  el.innerHTML = head + (wide
+    ? `<div class="cal-layout"><div>${monthRow}<div class="cal-grid">${cells}</div>${legend}${hint}</div><div class="cal-side">${summary}${extra}</div></div>`
+    : monthRow + summary + `<div class="cal-grid">${cells}</div>` + legend + hint);
 
   const calSel = el.querySelector('#cal-acct');
   if(calSel) calSel.onchange = e => { UI.statsAccountId = e.target.value; renderCalendar(); };
@@ -626,22 +854,24 @@ function renderCalendar(){
 function openDaySheet(iso, opts){
   const aid = UI.statsAccountId;
   const trades = S.trades.filter(t=>t.accountId===aid && t.date===iso).sort((a,b)=>b.createdAt-a.createdAt);
+  const missedList = S.missed.filter(t=>t.accountId===aid && t.date===iso).sort((a,b)=>b.createdAt-a.createdAt);
   const dayPnl = trades.reduce((s,t)=>s+tradePnl(t),0);
   openSheet(`
     <h3>${relDay(iso)}</h3>
-    <p class="desc">${trades.length} trade${trades.length===1?'':'s'} · Day PnL <b style="color:${dayPnl>0?'var(--green-deep)':dayPnl<0?'var(--red-deep)':'inherit'}">${money(dayPnl,true)}</b></p>
-    <div style="max-height:46vh;overflow-y:auto">
+    <p class="desc">${trades.length ? `${trades.length} trade${trades.length===1?'':'s'} · Day PnL <b style="color:${dayPnl>0?'var(--green-deep)':dayPnl<0?'var(--red-deep)':'inherit'}">${money(dayPnl,true)}</b>` : 'No trades taken'}${missedList.length ? ' · '+missedList.length+' missed' : ''}</p>
+    <div>
     ${trades.map(t=> tradeRowHTML(t, t.layers.length>1 ? t.layers.length+' layers' : '')).join('')}
+    ${missedList.length ? `<div class="sub-head"><span>Missed · not taken</span><span style="color:var(--ink-faint)">not counted</span></div>${missedList.map(t=>tradeRowHTML(t,'')).join('')}` : ''}
     </div>
   `, opts);
   sheetEl.querySelectorAll('.trade-row').forEach(r=> r.onclick = ()=>{
-    const t = S.trades.find(x=>x.id===r.dataset.id); if(!t) return;
+    const t = entryById(r.dataset.id); if(!t) return;
     const keep = window.scrollY, listScroll = sheetEl.scrollTop;
     UI.form = formFromTrade(t);
     UI.returnTo = 'calendar';
     UI.returnScroll = keep;
     UI.editBack = true;
-    leaveSheetFor('add', ()=>{ if(!S.trades.some(x=>x.accountId===UI.statsAccountId && x.date===iso)) return false; openDaySheet(iso, {noPush:true}); sheetEl.scrollTop = listScroll; return true; });
+    leaveSheetFor('add', ()=>{ if(![...S.trades, ...S.missed].some(x=>x.accountId===UI.statsAccountId && x.date===iso)) return false; openDaySheet(iso, {noPush:true}); sheetEl.scrollTop = listScroll; return true; });
   });
 }
 
@@ -779,7 +1009,14 @@ function renderStats(){
     }).join('') : `<div class="empty-chart">No trades taken this month.</div>`}
   </div>` : '';
 
-  el.innerHTML = `
+  /* missed trades this month: never part of the numbers above */
+  const mm = S.missed.filter(t=>t.accountId===aid && inMonth(t.date,y,m));
+  const mmWith = mm.filter(t=>(t.layers||[]).length);
+  const mmSum = mmWith.reduce((s,t)=>s+tradePnl(t),0);
+  const mmCount = {}; mm.forEach(t=>{ const k = t.reason||'none'; mmCount[k] = (mmCount[k]||0)+1; });
+  const mmReasons = Object.entries(mmCount).sort((a,b)=>b[1]-a[1]);
+  const C = {
+    hero: `
   <div class="hero">
     <div class="label-row">
       <span class="label">Account balance</span>
@@ -800,7 +1037,8 @@ function renderStats(){
       <button data-act="withdraw">${I.ul}<span>Withdraw</span></button>
     </div>
   </div>
-
+`,
+    combo: `
   <div class="card-navy" id="combo-card">
     <div class="card-title"><h3>Combos</h3><span class="sub">All time</span></div>
     ${combo.rows.length ? `
@@ -814,13 +1052,15 @@ function renderStats(){
       <p class="setup-note">Each combo is a level plus an entry; refined and unrefined trades count together. Sorted by estimated R per trade: a combo with few trades is pulled toward your overall average of ${fmtR(combo.avgR)}, so one lucky trade can't top the list. Edge and Leak only appear once a combo's result is clearly above or below 0R.</p>`
       : `<div class="empty-chart">${combo.total ? 'Tag trades with one level and one entry to see combos.' : 'No trades logged on this account yet.'}</div>`}
   </div>
-
+`,
+    month: `
   <div class="month-row">
     <button class="m-btn" id="m-prev" aria-label="Previous month">${I.chevL}</button>
     <span class="m-label">${MONTHS[m]} ${y}</span>
     <button class="m-btn" id="m-next" aria-label="Next month" ${isCurrent?'disabled':''}>${I.chevR}</button>
   </div>
-
+`,
+    goal: `
   ${goal>0 ? `
   <div class="card-navy">
     <div class="card-title"><h3>Monthly goal</h3><span class="sub">${goalHit?'Goal reached':money(goal)+' target'}</span></div>
@@ -832,12 +1072,14 @@ function renderStats(){
       <span style="font-weight:700;color:${goalHit?'var(--green)':'var(--gold-1)'}">${goalPct.toFixed(0)}%</span>
     </div>
   </div>` : ''}
-
+`,
+    grid: `
   <div class="stat-grid">
     <div class="stat-cell"><div class="k">${I.target}Win rate</div><div class="v">${winrate===null?'—':winrate.toFixed(1)+'%'}</div></div>
     <div class="stat-cell"><div class="k">${I.scale}Profit factor</div><div class="v">${pf===null?'—':pf===Infinity?'∞':pf.toFixed(2)}</div></div>
   </div>
-
+`,
+    wl: `
   <div class="card-navy">
     <div class="card-title"><h3>Wins vs losses</h3><span class="sub">${mt.length} trade${mt.length===1?'':'s'} · ${MONTHS_S[m]} ${y}</span></div>
     ${mt.length ? `
@@ -852,9 +1094,11 @@ function renderStats(){
       <span class="li"><span class="dot" style="background:#6b6250"></span><b>${bes.length}</b>&nbsp;Breakeven</span>
     </div>` : `<div class="empty-chart">No trades taken this month.</div>`}
   </div>
-
+`,
+    asset: `
   ${assetCardHTML}
-
+`,
+    setup: `
   <div class="card-navy" id="setup-card">
     <button class="card-toggle" data-bd-toggle aria-expanded="${!!UI.breakdownOpen}">
       <span><h3>Breakdown</h3><span class="sub">Level, entry and refinement on their own</span></span>
@@ -879,16 +1123,39 @@ function renderStats(){
       : `<div class="empty-chart">${setupRange==='all' ? 'No trades logged on this account yet.' : 'No trades this month. Switch to All time to see every trade.'}</div>`}
     ` : ''}
   </div>
-
+`,
+    equity: `
   <div class="card-navy">
     <div class="card-title"><h3>Equity curve</h3><span class="sub">All time</span></div>
     <div class="chart-wrap">${equitySVG(aid)}</div>
   </div>
-
+`,
+    monthly: `
   <div class="card-navy">
     <div class="card-title"><h3>Monthly PnL</h3><span class="sub">Last 6 months</span></div>
     <div class="chart-wrap">${monthlyBarsSVG(aid, y, m)}</div>
-  </div>`;
+  </div>
+`,
+    missed: `
+  <div class="card-navy">
+    <div class="card-title"><h3>Missed trades</h3><span class="sub">${MONTHS_S[m]} ${y}</span></div>
+    ${mm.length ? `
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:8px">
+      <div><div class="cal-sum" style="font-size:1.35rem;font-weight:700;color:var(--gold-1)">${mm.length}</div><div style="font-size:.7rem;color:var(--ink-faint)">not taken</div></div>
+      <div style="text-align:right"><div class="cal-sum" style="font-size:1.1rem;font-weight:700;color:${mmWith.length ? (mmSum>0?'var(--green)':mmSum<0?'var(--red)':'var(--ink)') : 'var(--ink-faint)'}">${mmWith.length ? money(mmSum,true) : '—'}</div>
+      <div style="font-size:.7rem;color:var(--ink-faint)">${mmWith.length ? 'would have made · '+mmWith.length+' with a result' : 'add a would-have result to see this'}</div></div>
+    </div>
+    ${mmReasons.map(([k,n])=>`<div class="reason-row"><span class="lab">${esc(reasonLabel(k))}</span><span class="bar"><i style="width:${n/mm.length*100}%"></i></span><b>${n}</b></div>`).join('')}
+    <button class="combo-more" data-missed-open style="margin-top:10px">See them in History</button>
+    ` : `<div class="empty-chart">No missed trades this month. When you skip a setup, open Add entry and switch to Missed.</div>`}
+  </div>
+`
+  };
+  el.innerHTML = isWide()
+    ? `<div class="stats-cols"><div>${C.hero}${C.month}${C.goal}${C.grid}${C.wl}${C.missed}${C.monthly}</div><div>${C.combo}${C.setup}${C.asset}${C.equity}</div></div>`
+    : C.hero + C.combo + C.month + C.goal + C.grid + C.wl + C.missed + C.asset + C.setup + C.equity + C.monthly;
+  const mo = el.querySelector('[data-missed-open]');
+  if(mo) mo.onclick = ()=>{ UI.historyKind = 'missed'; UI.historyFilter = S.accounts.length>1 ? aid : 'all'; UI.historyTag = 'all'; UI.historyLimit = 150; nav('history'); };
 
   const acctSel = el.querySelector('#stats-acct');
   if(acctSel) acctSel.onchange = e => { UI.statsAccountId = e.target.value; renderStats(); };
@@ -993,11 +1260,14 @@ function monthlyBarsSVG(aid, y, m){
 function blankForm(){
   const d = defAcct();
   return { editingId:null, accountId: d ? d.id : null, asset: S.settings.defaultAsset || S.assets[0] || null,
-           direction:'buy', entries:[{sign:1, str:''}], tags:[], notes:'', date: todayISO() };
+           direction:'buy', entries:[{sign:1, str:''}], tags:[], notes:'', date: todayISO(), kind:'taken', reason:null, images:[] };
 }
 function formFromTrade(t){
+  const layers = t.layers||[];
   return { editingId:t.id, accountId:t.accountId, asset:t.asset, direction:t.direction,
-    entries: t.layers.map(v=>({sign: v<0?-1:1, str: String(Math.abs(v))})), tags:[...(t.tags||[])], notes:t.notes, date:t.date };
+    entries: layers.length ? layers.map(v=>({sign: v<0?-1:1, str: String(Math.abs(v))})) : [{sign:1, str:''}],
+    tags:[...(t.tags||[])], notes:t.notes||'', date:t.date,
+    kind: t.missed ? 'missed' : 'taken', reason: t.reason||null, images:[...(t.images||[])] };
 }
 const calcNet = f => f.entries.reduce((s,e)=> s + (e.sign * (parseFloat(e.str)||0)), 0);
 const calcExpr = f => f.entries.map((e,i)=>{
@@ -1147,18 +1417,27 @@ function notePreview(t){
   return free || '';
 }
 function tradeRowHTML(t, meta){
-  const p = tradePnl(t); const kind = classify(t);
-  const cls = kind==='win'?'pos':kind==='loss'?'neg':'be';
   const multiAsset = S.assets.length>1 || S.trades.some(x=>x.asset!==t.asset);
-  return `<button class="trade-row" data-id="${t.id}">
+  let pnlHTML;
+  if(t.missed){
+    const has = (t.layers||[]).length, p = has ? tradePnl(t) : 0;
+    pnlHTML = has ? `<span class="pnl ${p>0?'pos':p<0?'neg':'be'}"><small class="would">would be</small>${money(p,true)}</span>` : `<span class="pnl none">—</span>`;
+    meta = [`<span class="reason">${esc(reasonLabel(t.reason))}</span>`, meta].filter(Boolean).join(' · ');
+  } else {
+    const p = tradePnl(t), kind = classify(t);
+    const cls = kind==='win'?'pos':kind==='loss'?'neg':'be';
+    pnlHTML = `<span class="pnl ${cls}">${kind==='be'?'BE':money(p,true)}${kind==='be'?'<small>'+money(p,true)+'</small>':''}</span>`;
+  }
+  return `<button class="trade-row ${t.missed?'missed':''}" data-id="${t.id}">
     ${multiAsset?`<span class="ava">${esc(t.asset.slice(0,3))}</span>`:''}
     <span class="mid">
-      <span class="sym">${multiAsset?esc(t.asset):''}<span class="dir-badge ${t.direction}">${t.direction.toUpperCase()}</span></span>
+      <span class="sym">${multiAsset?esc(t.asset):''}<span class="dir-badge ${t.direction}">${t.direction.toUpperCase()}</span>${t.missed?'<span class="dir-badge missed">MISSED</span>':''}</span>
       ${meta?`<span class="meta">${meta}</span>`:''}
       ${t.tags&&t.tags.length?`<span class="tagrow">${t.tags.map(tg=>`<span class="mini-tag">${esc(tg)}</span>`).join('')}</span>`:''}
       ${notePreview(t)?`<span class="note">${esc(notePreview(t))}</span>`:''}
+      ${rowThumbs(t)}
     </span>
-    <span class="pnl ${cls}">${kind==='be'?'BE':money(p,true)}${kind==='be'?'<small>'+money(p,true)+'</small>':''}</span>
+    ${pnlHTML}
     ${I.chevR}
   </button>`;
 }
@@ -1234,10 +1513,19 @@ function renderAdd(){
   const net = calcNet(f);
   const editing = !!f.editingId;
 
+  const missed = f.kind==='missed';
+  const imgs = f.images || [];
   el.innerHTML = `
-  <h2 style="font-size:1.3rem;margin:4px 2px 6px">${editing?'Edit trade':'Add trade'}</h2>
+  <h2 style="font-size:1.3rem;margin:4px 2px 6px">${editing ? (missed?'Edit missed trade':'Edit trade') : 'New entry'}</h2>
   <p style="font-size:.82rem;color:var(--ink-dark-dim);margin:0 2px">${editing?'Update the details below.':'Log it while the details are fresh.'}</p>
 
+  <div class="kind-seg" role="group" aria-label="Entry type">
+    <button data-kind="taken" class="${!missed?'on':''}" aria-pressed="${!missed}">${I.check}Taken</button>
+    <button data-kind="missed" class="missed ${missed?'on':''}" aria-pressed="${missed}">${I.eye}Missed</button>
+  </div>
+  ${missed?`<p class="missed-note">For setups you saw but didn’t take. They show on your calendar and in History, but never count toward your balance or stats.</p>`:''}
+
+  <div class="add-grid"><div class="add-main">
   ${S.accounts.length>1 ? `<div class="section-label">Account</div>
   <div class="chips" id="f-accounts">
     ${S.accounts.map(a=>`<button class="select-chip ${a.id===f.accountId?'on':''}" data-id="${a.id}">${esc(a.name)}</button>`).join('')}
@@ -1254,6 +1542,11 @@ function renderAdd(){
     <button class="sell ${f.direction==='sell'?'on':''}" data-dir="sell">${I.down}Sell</button>
   </div>
 
+  ${missed ? `<div class="section-label">Why I didn’t take it</div>
+  <div class="chips" id="f-reason">
+    ${MISSED_REASONS.map(([k,l])=>`<button class="select-chip ${f.reason===k?'on':''}" data-reason="${k}">${l}</button>`).join('')}
+  </div>` : ''}
+
   ${tagPickerHTML(f)}
 
   <div class="section-label">Journal</div>
@@ -1261,11 +1554,19 @@ function renderAdd(){
     <button class="select-chip ghost" id="f-tpl">${I.plus}Template</button>
     <button class="select-chip ghost" id="f-legend">${I.note}Legend</button>
   </div>
-  <div class="field">${I.note}<textarea id="f-notes" placeholder="Plan: 4289 SL30 TP60 — tap Template to start">${esc(f.notes)}</textarea></div>
+  <div class="field">${I.note}<textarea id="f-notes" placeholder="${missed?'What you saw, why you held back, what price did after':'Plan: 4289 SL30 TP60 — tap Template to start'}">${esc(f.notes)}</textarea></div>
 
-  <div class="section-label">PnL calculator</div>
-  <div class="calc">
-    <div class="net-label">Net PnL</div>
+  <div class="section-label">Screenshots <span class="optional">· optional</span></div>
+  <div class="shots" id="f-shots">
+    ${imgs.map(id=>shotThumb(id, true)).join('')}
+    ${f.imgBusy ? `<div class="shot"><span class="busy">Adding…</span></div>` : ''}
+    ${imgs.length < IMG_MAX_PER_ENTRY ? `<button class="shot add" id="f-add-img">${I.img}<span>Add</span></button>` : ''}
+  </div>
+  </div><div class="add-side">
+
+  <div class="section-label">${missed ? 'Would-have PnL <span class="optional">· optional</span>' : 'PnL calculator'}</div>
+  <div class="calc ${missed?'missed':''}">
+    <div class="net-label">${missed ? 'Would have made' : 'Net PnL'}</div>
     <div class="net" id="k-net" style="color:${net>0?'var(--green)':net<0?'var(--red)':'var(--ink)'}">${money(net,true)}</div>
     <div class="expr" id="k-expr">${calcExpr(f)}</div>
     <div class="keypad" id="keypad">
@@ -1279,13 +1580,23 @@ function renderAdd(){
   <div class="section-label">Date</div>
   <div class="field">${I.cal}<input type="date" id="f-date" value="${f.date}" max="${todayISO()}"></div>
 
-  <button class="btn-primary" id="f-save">${I.check}${editing?'Save changes':'Save trade'}</button>
-  ${editing?`<button class="btn-danger-ghost" id="f-delete">${I.trash}Delete trade</button>`:''}`;
+  <button class="btn-primary" id="f-save">${I.check}${editing?'Save changes':(missed?'Save missed trade':'Save trade')}</button>
+  ${editing?`<button class="btn-danger-ghost" id="f-delete">${I.trash}${missed?'Delete entry':'Delete trade'}</button>`:''}
+  </div></div>`;
 
   /* wire */
   const fa = el.querySelector('#f-accounts'); if(fa) fa.onclick = e => { const b=e.target.closest('[data-id]'); if(b){ f.accountId=b.dataset.id; renderAdd(); } };
   const fs = el.querySelector('#f-assets'); if(fs) fs.onclick = e => { const b=e.target.closest('[data-sym]'); if(b){ f.asset=b.dataset.sym; renderAdd(); } };
   el.querySelectorAll('[data-dir]').forEach(b=> b.onclick = ()=>{ f.direction=b.dataset.dir; renderAdd(); });
+  el.querySelectorAll('[data-kind]').forEach(b=> b.onclick = ()=>{ if(f.kind!==b.dataset.kind){ f.kind = b.dataset.kind; rerenderForm(f); } });
+  const fr = el.querySelector('#f-reason'); if(fr) fr.onclick = e => { const b=e.target.closest('[data-reason]'); if(b){ f.reason = f.reason===b.dataset.reason ? null : b.dataset.reason; rerenderForm(f); } };
+  el.querySelector('#f-shots').onclick = e => {
+    const rm = e.target.closest('[data-rm-img]');
+    if(rm){ f.images = (f.images||[]).filter(x=>x!==rm.dataset.rmImg); rerenderForm(f); return; }
+    const v = e.target.closest('[data-view]');
+    if(v){ openViewer([...(f.images||[])], (f.images||[]).indexOf(v.dataset.view)); return; }
+    if(e.target.closest('#f-add-img')) document.getElementById('img-file').click();
+  };
 
   el.querySelectorAll('.tag-group').forEach(row=> row.onclick = e => {
     const b=e.target.closest('[data-tag]');
@@ -1338,34 +1649,50 @@ function renderAdd(){
   growTa();
   el.querySelector('#f-save').onclick = saveTrade;
   const delBtn = el.querySelector('#f-delete');
-  if(delBtn) delBtn.onclick = ()=> confirmSheet('Delete this trade?','This removes it from your journal and stats. This can\'t be undone.',()=>{
+  if(delBtn) delBtn.onclick = ()=> confirmSheet(missed?'Delete this entry?':'Delete this trade?', missed?'This removes the missed trade and its screenshots. This can\'t be undone.':'This removes it from your journal and stats. This can\'t be undone.',()=>{
     const dest = UI.returnTo||'history';
-    S.trades = S.trades.filter(t=>t.id!==f.editingId); save(); UI.form=null; UI.returnTo=null; toast('Trade deleted');
+    const orig = entryById(f.editingId);
+    S.trades = S.trades.filter(t=>t.id!==f.editingId); S.missed = S.missed.filter(t=>t.id!==f.editingId);
+    if(orig) forgetImages(orig.images);
+    save(); UI.form=null; UI.returnTo=null; toast(missed?'Entry deleted':'Trade deleted');
     leaveEdit(dest);
   });
 }
 function saveTrade(){
   const f = UI.form;
   if(!f) return; /* guard: double-tap after save already cleared the form */
+  if(f.imgBusy) return toast('Wait for the screenshots to finish adding');
   if(!f.accountId) return toast('Pick an account');
   if(!f.asset) return toast('Pick an asset');
+  const missed = f.kind==='missed';
   const layers = f.entries.filter(e=>e.str!=='' && !isNaN(parseFloat(e.str))).map(e=> e.sign*parseFloat(e.str));
-  if(!layers.length) return toast('Enter the PnL on the calculator');
-  const issues = tagIssues(f.tags);
+  if(!missed && !layers.length) return toast('Enter the PnL on the calculator');
+  const issues = missed ? [] : tagIssues(f.tags);
   if(issues.length && !f.tagsConfirmed){
     return askSheet('Save with '+issues.join(' and ')+'?',
       'The weekly report will list this trade as a tagging error. Go back to fix it, or save it as it is.',
       'Save anyway', ()=>{ f.tagsConfirmed = true; saveTrade(); });
   }
-  const trade = {
-    id: f.editingId || uid(),
+  /* the entry may have been removed on another device while this form was open */
+  const orig = f.editingId ? entryById(f.editingId) : null;
+  const stamp = Date.now();
+  const rec = {
+    id: orig ? orig.id : uid(),
     accountId: f.accountId, asset: f.asset, direction: f.direction,
     layers, tags: f.tags||[], notes: f.notes.trim(), date: f.date || todayISO(),
-    createdAt: f.editingId ? (S.trades.find(t=>t.id===f.editingId)?.createdAt || Date.now()) : Date.now()
+    images: [...(f.images||[])],
+    createdAt: orig ? (orig.createdAt || stamp) : stamp,
+    updatedAt: stamp
   };
+  if(missed){ rec.missed = true; rec.reason = f.reason || null; }
+  const fromArr = orig ? (orig.missed ? S.missed : S.trades) : null;
+  const toArr = missed ? S.missed : S.trades;
+  if(orig && fromArr===toArr) toArr[toArr.indexOf(orig)] = rec;
+  else { if(orig) fromArr.splice(fromArr.indexOf(orig), 1); toArr.push(rec); }
+  if(orig) forgetImages((orig.images||[]).filter(id=>!rec.images.includes(id)));
   const dest = f.editingId ? (UI.returnTo||'history') : 'calendar';
-  if(f.editingId){ const i = S.trades.findIndex(t=>t.id===f.editingId); S.trades[i] = trade; toast('Trade updated'); }
-  else { S.trades.push(trade); toast('Trade saved · ' + money(tradePnl(trade),true)); }
+  if(missed) toast(orig ? 'Entry updated' : 'Missed trade logged');
+  else toast(orig ? 'Trade updated' : 'Trade saved · ' + money(tradePnl(rec),true));
   save(); UI.form = null; UI.returnTo = null;
   leaveEdit(dest);
 }
@@ -1385,7 +1712,9 @@ function renderHistory(){
   if(!S.accounts.length){ el.innerHTML = emptyOnboard(); return; }
   const fid = UI.historyFilter;
   const ftag = UI.historyTag || 'all';
-  let all = [...S.trades].sort((a,b)=> a.date===b.date ? (b.createdAt-a.createdAt) : (a.date<b.date?1:-1));
+  const hk = UI.historyKind || 'trades';
+  const source = hk==='missed' ? S.missed : S.trades;
+  let all = [...source].sort((a,b)=> a.date===b.date ? (b.createdAt-a.createdAt) : (a.date<b.date?1:-1));
   if(fid!=='all') all = all.filter(t=>t.accountId===fid);
   if(ftag!=='all') all = all.filter(t=> (t.tags||[]).includes(ftag));
 
@@ -1399,24 +1728,33 @@ function renderHistory(){
 
   let listHtml = '';
   if(!trades.length){
-    listHtml = `<div class="empty-state">${I.book}<p><b>${S.trades.length?'No trades match this filter.':'Nothing on record.'}</b><br>${S.trades.length?'Try a different account or tag.':'The journal starts with the next trade you take.'}</p></div>`;
+    listHtml = hk==='missed'
+      ? `<div class="empty-state">${I.eye}<p><b>${S.missed.length?'No missed trades match this filter.':'No missed trades yet.'}</b><br>${S.missed.length?'Try a different account or tag.':'When you skip a setup, open Add entry and switch to Missed.'}</p></div>`
+      : `<div class="empty-state">${I.book}<p><b>${S.trades.length?'No trades match this filter.':'Nothing on record.'}</b><br>${S.trades.length?'Try a different account or tag.':'The journal starts with the next trade you take.'}</p></div>`;
   } else {
     let curDay = null;
     for(const t of trades){
       if(t.date !== curDay){
         curDay = t.date;
         const dayTrades = trades.filter(x=>x.date===curDay);
-        const dayPnl = dayTrades.reduce((s,x)=>s+tradePnl(x),0);
-        listHtml += `<div class="day-head"><span>${relDay(curDay)}</span><span class="dp" style="color:${dayPnl>0?'var(--green-deep)':dayPnl<0?'var(--red-deep)':'inherit'}">${money(dayPnl,true)}</span></div>`;
+        if(hk==='missed') listHtml += `<div class="day-head"><span>${relDay(curDay)}</span><span style="color:var(--gold-1)">${dayTrades.length} missed</span></div>`;
+        else {
+          const dayPnl = dayTrades.reduce((s,x)=>s+tradePnl(x),0);
+          listHtml += `<div class="day-head"><span>${relDay(curDay)}</span><span class="dp" style="color:${dayPnl>0?'var(--green-deep)':dayPnl<0?'var(--red-deep)':'inherit'}">${money(dayPnl,true)}</span></div>`;
+        }
       }
       const a = acct(t.accountId);
-      const meta = [S.accounts.length>1 ? esc(a?a.name:'Deleted account') : '', t.layers.length>1 ? t.layers.length+' layers' : ''].filter(Boolean).join(' · ');
+      const meta = [S.accounts.length>1 ? esc(a?a.name:'Deleted account') : '', (t.layers||[]).length>1 && !t.missed ? t.layers.length+' layers' : ''].filter(Boolean).join(' · ');
       listHtml += tradeRowHTML(t, meta);
     }
   }
 
   el.innerHTML = `
   <h2 style="font-size:1.3rem;margin:4px 2px 14px">History</h2>
+  <div class="kind-seg" role="group" aria-label="Show" style="margin:0 0 12px">
+    <button data-hk="trades" class="${hk==='trades'?'on':''}" aria-pressed="${hk==='trades'}">Trades · ${S.trades.length}</button>
+    <button data-hk="missed" class="missed ${hk==='missed'?'on':''}" aria-pressed="${hk==='missed'}">Missed · ${S.missed.length}</button>
+  </div>
   ${S.accounts.length>1?`<div class="filter-scroll">
     <button class="select-chip ${fid==='all'?'on':''}" data-f="all">All accounts</button>
     ${S.accounts.map(a=>`<button class="select-chip ${fid===a.id?'on':''}" data-f="${a.id}">${esc(a.name)}</button>`).join('')}
@@ -1426,7 +1764,8 @@ function renderHistory(){
     ${S.tags.map(tg=>`<button class="select-chip ${ftag===tg?'on':''}" data-t="${esc(tg)}">${esc(tg)}</button>`).join('')}
   </div>`:''}
   ${listHtml}
-  ${older>0?`<button class="btn-soft" id="h-more" style="width:100%;margin-top:8px">Show older · ${older} more trade${older===1?'':'s'}</button>`:''}`;
+  ${older>0?`<button class="btn-soft" id="h-more" style="width:100%;margin-top:8px">Show older · ${older} more ${hk==='missed'?'entr'+(older===1?'y':'ies'):'trade'+(older===1?'':'s')}</button>`:''}`;
+  el.querySelectorAll('[data-hk]').forEach(b=> b.onclick = ()=>{ UI.historyKind = b.dataset.hk; UI.historyLimit = 150; renderHistory(); });
 
   el.querySelectorAll('.filter-scroll').forEach(row=>{
     row.onclick = e=>{
@@ -1437,7 +1776,7 @@ function renderHistory(){
   const more = el.querySelector('#h-more');
   if(more) more.onclick = ()=>{ const keep = window.scrollY; UI.historyLimit = (UI.historyLimit||150) + 150; renderHistory(); window.scrollTo({top:keep}); };
   el.querySelectorAll('.trade-row').forEach(r=> r.onclick = ()=>{
-    const t = S.trades.find(x=>x.id===r.dataset.id); if(!t) return;
+    const t = entryById(r.dataset.id); if(!t) return;
     UI.form = formFromTrade(t);
     UI.returnTo = 'history';
     UI.returnScroll = window.scrollY;
@@ -1451,8 +1790,28 @@ function renderHistory(){
    ============================================================ */
 function renderSettings(){
   const el = document.getElementById('view-settings');
+  const syncCard = `<div class="card-glass" id="sync-card">
+    <div class="card-title"><h3>Sync</h3>${SM.key?'<span class="badge">ON</span>':''}</div>
+    ${SM.key ? `
+      <p class="sync-status" id="sync-status"></p>
+      <p style="font-size:.76rem;color:var(--ink-dark-dim);margin:-4px 0 12px" id="sync-imgs"></p>
+      <div class="row-btns">
+        <button class="btn-soft" id="sy-now">${I.cloud}Sync now</button>
+        <button class="btn-soft" id="sy-off">Disconnect</button>
+      </div>
+      <p class="missed-note">Disconnecting keeps everything on this device. It only stops syncing here.</p>`
+    : `
+      <p style="font-size:.78rem;color:var(--ink-dark-dim);margin-bottom:12px;line-height:1.5">Keep one journal across your phone, iPad and computer. Enter your passcode once on each device.</p>
+      <form id="sy-form" autocomplete="on">
+        <input type="text" name="username" value="TradeTrackr" autocomplete="username" hidden readonly>
+        <div class="field" style="background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)">${I.cloud}<input id="sy-key" name="password" type="password" autocomplete="current-password" placeholder="Passcode" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
+        <button class="btn-primary" id="sy-connect" type="submit" style="margin-top:12px">${I.check}Connect</button>
+      </form>`}
+  </div>`;
   el.innerHTML = `
   <h2 style="font-size:1.3rem;margin:4px 2px 14px">Settings</h2>
+  <div class="settings-cols">
+  ${syncCard}
 
   <div class="card-glass">
     <div class="card-title"><h3>Accounts</h3><button class="mini-btn" id="s-add-acct" aria-label="Add account">${I.plus}</button></div>
@@ -1513,7 +1872,7 @@ function renderSettings(){
 
   <div class="card-glass">
     <div class="card-title"><h3>Data</h3></div>
-    <p style="font-size:.78rem;color:var(--ink-dark-dim);margin-bottom:8px">Your journal lives on this device. Export a backup regularly — restore it here or on another phone.</p>
+    <p style="font-size:.78rem;color:var(--ink-dark-dim);margin-bottom:8px">${SM.key ? 'Your journal is saved on this device and synced to the cloud. A backup file is an extra copy you keep yourself.' : 'Your journal lives on this device. Export a backup regularly, or turn on Sync above.'} Backups include your screenshots.</p>
     ${(()=>{
       const lb = S.settings.lastBackupAt;
       if(!S.trades.length && !lb) return '';
@@ -1528,8 +1887,19 @@ function renderSettings(){
     </div>
     <button class="btn-soft" id="s-export-week" style="width:100%;margin-top:10px">${I.note}Weekly report \u2014 for AI review</button>
     <button class="btn-soft" id="s-export-csv" style="width:100%;margin-top:10px">${I.hash}Export trades as CSV</button>
-    <button class="btn-danger-ghost" id="s-reset" style="margin-top:14px">${I.trash}Erase all data</button>
+    <button class="btn-danger-ghost" id="s-reset" style="margin-top:14px">${I.trash}Erase all data${SM.key?' on this device':''}</button>
+  </div>
   </div>`;
+
+  paintSync(); paintImgCount();
+  const syForm = el.querySelector('#sy-form');
+  if(syForm) syForm.onsubmit = async e => {
+    e.preventDefault();
+    const btn = el.querySelector('#sy-connect'); btn.disabled = true;
+    try{ await connectSync(el.querySelector('#sy-key').value); } finally { if(btn.isConnected) btn.disabled = false; }
+  };
+  const syNow = el.querySelector('#sy-now'); if(syNow) syNow.onclick = ()=>{ syncNow(); };
+  const syOff = el.querySelector('#sy-off'); if(syOff) syOff.onclick = ()=> askSheet('Disconnect this device?', 'Your journal stays on this device and in the cloud. This device just stops syncing until you enter the passcode again.', 'Disconnect', ()=>{ disconnectSync(); renderSettings(); toast('Sync turned off on this device'); });
 
   el.querySelector('#s-add-acct').onclick = ()=> openAccountSheet();
   el.querySelectorAll('[data-act="def"]').forEach(b=> b.onclick = ()=>{ S.settings.defaultAccountId=b.dataset.id; save(); toast('Default account set'); renderSettings(); });
@@ -1537,9 +1907,12 @@ function renderSettings(){
   el.querySelectorAll('[data-act="del"]').forEach(b=> b.onclick = ()=>{
     const a = acct(b.dataset.id);
     const n = S.trades.filter(t=>t.accountId===a.id).length;
-    confirmSheet(`Delete "${a.name}"?`, `This also deletes its ${n} trade${n===1?'':'s'} and all deposits/withdrawals. This can't be undone.`, ()=>{
+    const nm = S.missed.filter(t=>t.accountId===a.id).length;
+    confirmSheet(`Delete "${a.name}"?`, `This also deletes its ${n} trade${n===1?'':'s'}${nm?`, ${nm} missed trade${nm===1?'':'s'}`:''} and all deposits/withdrawals. This can't be undone.`, ()=>{
+      forgetImages([...S.trades, ...S.missed].filter(t=>t.accountId===a.id).flatMap(t=>t.images||[]));
       S.accounts = S.accounts.filter(x=>x.id!==a.id);
       S.trades = S.trades.filter(t=>t.accountId!==a.id);
+      S.missed = S.missed.filter(t=>t.accountId!==a.id);
       S.txns = S.txns.filter(t=>t.accountId!==a.id);
       if(S.settings.defaultAccountId===a.id) S.settings.defaultAccountId = S.accounts[0]?.id || null;
       if(UI.statsAccountId===a.id) UI.statsAccountId = null;
@@ -1562,11 +1935,11 @@ function renderSettings(){
   if(grpOk) grpOk.onclick = ()=>{ S.settings.tagGroupsToReview = false; save(); toast('Tag groups saved'); renderSettings(); };
   el.querySelectorAll('[data-act="rm-tag"]').forEach(b=> b.onclick = ()=>{
     const tg = b.closest('[data-tg]').dataset.tg;
-    const used = S.trades.filter(t=>(t.tags||[]).includes(tg)).length;
+    const used = [...S.trades, ...S.missed].filter(t=>(t.tags||[]).includes(tg)).length;
     const doIt = ()=>{
       S.tags = S.tags.filter(x=>x!==tg);
       if(S.tagGroups) delete S.tagGroups[tg];
-      S.trades.forEach(t=>{ if(t.tags) t.tags = t.tags.filter(x=>x!==tg); });
+      [...S.trades, ...S.missed].forEach(t=>{ if(t.tags) t.tags = t.tags.filter(x=>x!==tg); });
       if(UI.historyTag===tg) UI.historyTag='all';
       save(); renderSettings();
     };
@@ -1588,9 +1961,13 @@ function renderSettings(){
   el.querySelector('#s-export-week').onclick = exportWeekly;
   el.querySelector('#s-export-csv').onclick = exportCSV;
   el.querySelector('#s-import').onclick = ()=> document.getElementById('import-file').click();
-  el.querySelector('#s-reset').onclick = ()=> confirmSheet('Erase all data?','Every account, trade, and note will be permanently deleted from this device.',()=>{
-    localStorage.removeItem(LS_KEY); S = load(); UI = {tab:'calendar',statsAccountId:null,statsY:now.getFullYear(),statsM:now.getMonth(),historyFilter:'all', historyTag:'all', form:null};
-    toast('All data erased'); nav('calendar');
+  el.querySelector('#s-reset').onclick = ()=> confirmSheet(SM.key ? 'Erase this device?' : 'Erase all data?', SM.key ? 'Every account, trade and screenshot will be removed from this device and sync will be turned off here. The cloud copy is not touched.' : 'Every account, trade, note and screenshot will be permanently deleted from this device.',()=>{
+    const wasSync = !!SM.key;
+    disconnectSync();
+    localStorage.removeItem(LS_KEY); try{ localStorage.removeItem('tt_img_del'); }catch(e){}
+    imgClearAll().catch(()=>{}); IMG_URLS.forEach(u=>URL.revokeObjectURL(u)); IMG_URLS.clear();
+    S = load(); UI = {tab:'calendar',statsAccountId:null,statsY:now.getFullYear(),statsM:now.getMonth(),historyFilter:'all', historyTag:'all', form:null};
+    toast(wasSync ? 'This device was erased' : 'All data erased'); nav('calendar');
   });
 }
 
@@ -1841,15 +2218,23 @@ function confirmSheet(title, desc, onYes){
 /* ============================================================
    EXPORT / IMPORT
    ============================================================ */
-function exportData(){
-  const blob = new Blob([JSON.stringify({app:'tradetrackr',version:1,exportedAt:new Date().toISOString(),data:S},null,2)],{type:'application/json'});
+async function exportData(){
+  const ids = [...referencedImages()];
+  const images = {}; let missing = 0;
+  if(ids.length) toast('Preparing backup…');
+  for(const id of ids){
+    let rec = null; try{ rec = await imgGet(id); }catch(e){}
+    if(!rec) rec = await imgDownload(id);
+    if(rec) images[id] = { mime: rec.mime, b64: bufToB64(rec.buf) }; else missing++;
+  }
+  const blob = new Blob([JSON.stringify({app:'tradetrackr',version:2,exportedAt:new Date().toISOString(),data:S,images},null,1)],{type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'tradetrackr-backup-'+todayISO()+'.json';
   a.click(); URL.revokeObjectURL(a.href);
   S.settings.lastBackupAt = Date.now(); save();
   if(UI.tab==='settings') renderSettings();
-  toast('Backup exported');
+  toast(missing ? 'Backup exported · '+missing+' screenshot'+(missing===1?'':'s')+' not on this device' : 'Backup exported');
 }
 document.getElementById('import-file').addEventListener('change', e=>{
   const file = e.target.files[0]; if(!file) return;
@@ -1859,11 +2244,14 @@ document.getElementById('import-file').addEventListener('change', e=>{
       const j = JSON.parse(reader.result);
       const d = j.data && Array.isArray(j.data.accounts) ? j.data : (Array.isArray(j.accounts) ? j : null);
       if(!d) throw 0;
-      confirmSheet('Restore this backup?','This replaces everything currently on this device with the backup file.',()=>{
-        S = { accounts:d.accounts||[], assets:d.assets||[...DEFAULT_ASSETS], tags:d.tags||[...DEFAULT_TAGS], tagGroups:d.tagGroups||{}, trades:d.trades||[], txns:d.txns||[], settings:d.settings||{defaultAccountId:d.accounts?.[0]?.id||null, defaultAsset:'XAUUSD', beThreshold:0} };
-        S.trades.forEach(t=>{ if(!Array.isArray(t.tags)) t.tags = []; });
-        if(fillTagGroups(S) && S.tags.some(tg=>S.tagGroups[tg]!=='other')) S.settings.tagGroupsToReview = true;
-        S.accounts.forEach(a=>{ if(a.monthlyGoal==null) a.monthlyGoal = 0; });
+      confirmSheet('Restore this backup?', SM.key ? 'This replaces everything on this device with the backup file, and then replaces the cloud copy too.' : 'This replaces everything currently on this device with the backup file.', async ()=>{
+        if(!d.settings) d.settings = {defaultAccountId:d.accounts?.[0]?.id||null, defaultAsset:'XAUUSD', beThreshold:0};
+        S = normalize(JSON.parse(JSON.stringify(d)));
+        const imgs = j.images && typeof j.images==='object' ? j.images : {};
+        for(const [id, im] of Object.entries(imgs)){
+          if(!/^[a-z0-9]{6,40}$/.test(id) || !im || !im.b64) continue;
+          try{ await imgPutRec({ id, mime: im.mime||'image/jpeg', buf: b64ToBuf(im.b64), at: Date.now() }); await pendAdd(id); }catch(e){}
+        }
         save(); UI.statsAccountId=null; UI.historyFilter='all'; UI.form=null;
         toast('Backup restored'); nav('calendar');
       });
@@ -2062,6 +2450,11 @@ function exportWeekly(){
     allTimeComboRanking: (cs => ({ overallAvgR: r2(cs.avgR), tradesWithR: cs.withR, pullTrades: COMBO_K, edgeLeakZ: COMBO_Z, minTradesForVerdict: COMBO_MIN,
       combos: cs.rows.map((c,i)=>({ rank: i+1, combo: c.id, trades: c.n, tradesWithR: c.nR, ownAvgR: c.rawR===null ? null : r2(c.rawR),
         estimatedR: c.adjR===null ? null : r2(c.adjR), verdict: c.verdict==='edge' ? 'Edge' : c.verdict==='leak' ? 'Leak' : null })) }))(comboStats(S.trades)),
+    missedThisWeek: S.missed.filter(t=> t.date>=from && t.date<=to).sort((a,b)=> a.date<b.date?-1:a.date>b.date?1:0).map(t=>({
+      date: t.date, asset: t.asset, direction: t.direction, reason: reasonLabel(t.reason),
+      wouldHavePnl: (t.layers||[]).length ? r2(tradePnl(t)) : null, tags: t.tags||[], notes: t.notes||'', screenshots: (t.images||[]).length
+    })),
+    missedAllTimeByReason: S.missed.reduce((o,t)=>{ const k = reasonLabel(t.reason); o[k] = (o[k]||0)+1; return o; }, {}),
     thisWeekByDirection: groupBlock(week, t=>[t.direction]),
     allTimeByDirection: groupBlock(S.trades, t=>[t.direction]),
     trades: week.map(t=>({
@@ -2113,6 +2506,432 @@ function exportCSV(){
 
 
 /* ============================================================
+   SYNC (Neon) — one passcode, one shared copy of the journal
+   ============================================================ */
+const DEFAULT_SYNC_URL = 'https://br-soft-king-b3su4142-ttsync.compute.c-4.ap-southeast-1.aws.neon.tech';
+const SYNC_URL = (()=>{ let u = null; try{ u = localStorage.getItem('tt_sync_url'); }catch(e){} return (u || DEFAULT_SYNC_URL).replace(/\/+$/,''); })();
+const SYNC_META = 'tt_sync';
+function blankMeta(){ return { key:null, rev:0, dirty:false, baseIds:[], lastSyncAt:null }; }
+let SM = (()=>{ try{ const m = JSON.parse(localStorage.getItem(SYNC_META)||'null'); if(m && typeof m==='object') return Object.assign(blankMeta(), m); }catch(e){} return blankMeta(); })();
+function saveMeta(){ try{ localStorage.setItem(SYNC_META, JSON.stringify(SM)); }catch(e){} }
+/* status: off | ok | busy | offline | auth | error */
+const SY = { status: SM.key ? 'busy' : 'off', busy:false, again:false, timer:null, msg:'' };
+
+function ago(ts){
+  const s = Math.round((Date.now()-ts)/1000);
+  if(s < 45) return 'just now';
+  if(s < 3600) return Math.round(s/60)+' min ago';
+  if(s < 86400) return Math.round(s/3600)+' h ago';
+  return fmtDateShort(new Date(ts).toISOString().slice(0,10));
+}
+function syncStatusInfo(){
+  if(!SM.key) return { color:'var(--ink-faint)', text:'Not connected', pill:'', short:'' };
+  if(SY.status==='busy') return { color:'var(--gold-1)', text:'Syncing…', pill:'busy', short:'Syncing' };
+  if(SY.status==='offline') return { color:'var(--gold-1)', text:'Offline. Changes are saved here and upload when you’re back online.', pill:'warn', short:'Offline' };
+  if(SY.status==='auth') return { color:'var(--red)', text:'Passcode rejected. Disconnect, then enter the passcode again.', pill:'err', short:'Passcode' };
+  if(SY.status==='error') return { color:'var(--red)', text:SY.msg || 'Sync error. It will retry.', pill:'err', short:'Error' };
+  if(SM.dirty) return { color:'var(--gold-1)', text:'Waiting to upload', pill:'busy', short:'Saving' };
+  return { color:'var(--green)', text:'Synced' + (SM.lastSyncAt ? ' · ' + ago(SM.lastSyncAt) : ''), pill:'ok', short:'Synced' };
+}
+function paintSync(){
+  const info = syncStatusInfo();
+  const pill = document.getElementById('sync-pill');
+  if(pill){
+    pill.hidden = !SM.key;
+    pill.className = 'sync-pill ' + info.pill;
+    document.getElementById('sync-pill-txt').textContent = info.short;
+  }
+  const line = document.getElementById('sync-status');
+  if(line) line.innerHTML = `<span class="dot" style="background:${info.color}"></span><span style="color:${info.color}">${esc(info.text)}</span>`;
+}
+function setSyncStatus(st, msg){ SY.status = st; SY.msg = msg||''; paintSync(); }
+
+async function api(path, opts){
+  opts = opts || {};
+  const hasBody = opts.body !== undefined;
+  const res = await fetch(SYNC_URL + path, {
+    method: opts.method || 'GET',
+    headers: Object.assign({ 'Authorization':'Bearer ' + (opts.key || SM.key) }, hasBody ? { 'Content-Type':'application/json' } : {}),
+    body: hasBody ? JSON.stringify(opts.body) : undefined,
+    cache: 'no-store'
+  });
+  let body = null; try{ body = await res.json(); }catch(e){}
+  return { status: res.status, body };
+}
+/* Handle a non-OK reply. Returns false so callers can stop. */
+function badResponse(r){
+  if(r.status===401) setSyncStatus('auth');
+  else if(r.status===429) setSyncStatus('error', 'Too many wrong passcodes. Sync is paused for 5 minutes.');
+  else if(r.status===413) setSyncStatus('error', 'Your journal is too large to upload in one go.');
+  else setSyncStatus('error', 'Sync service error ('+r.status+'). It will retry.');
+  return false;
+}
+const collectIds = d => { const out = []; ['accounts','trades','missed','txns'].forEach(k=> (d[k]||[]).forEach(x=>{ if(x && x.id) out.push(k+':'+x.id); })); return out; };
+
+/* Combine the cloud copy with this device's copy.
+   Same entry on both: the most recently edited one wins.
+   Only on one side: kept if it's new, dropped if it was there at the last sync (deleted on the other side). */
+function mergeStates(remote, local, baseIdsArr){
+  const out = normalize(JSON.parse(JSON.stringify(remote))) || blankState();
+  const base = new Set(baseIdsArr||[]);
+  const stamp = x => x.updatedAt || x.createdAt || 0;
+  ['accounts','trades','missed','txns'].forEach(k=>{
+    const r = out[k]||[], l = local[k]||[];
+    const lMap = new Map(l.map(x=>[x.id,x])), rIds = new Set(r.map(x=>x.id));
+    const res = [];
+    r.forEach(x=>{ const lx = lMap.get(x.id); if(lx) res.push(stamp(lx) >= stamp(x) ? lx : x); else if(!base.has(k+':'+x.id)) res.push(x); });
+    l.forEach(x=>{ if(!rIds.has(x.id) && !base.has(k+':'+x.id)) res.push(x); });
+    out[k] = res;
+  });
+  const union = (a,b) => [...new Set([...(a||[]), ...(b||[])])];
+  out.assets = union(out.assets, local.assets);
+  out.tags = union(out.tags, local.tags);
+  out.tagGroups = Object.assign({}, out.tagGroups||{}, local.tagGroups||{});
+  out.settings = Object.assign({}, out.settings||{}, local.settings||{});
+  if(out.settings.defaultAccountId && !out.accounts.some(a=>a.id===out.settings.defaultAccountId)) out.settings.defaultAccountId = out.accounts[0]?.id || null;
+  return normalize(out);
+}
+function rerenderAfterSync(){
+  if(UI.statsAccountId && !acct(UI.statsAccountId)) UI.statsAccountId = null;
+  if(UI.historyFilter!=='all' && !acct(UI.historyFilter)) UI.historyFilter = 'all';
+  if(UI.tab!=='add') render();
+}
+function applyRemote(data, rev){
+  const d = normalize(data); if(!d) return;
+  S = d; saveLocal();
+  SM.rev = rev; SM.baseIds = collectIds(S); SM.dirty = false; SM.lastSyncAt = Date.now(); saveMeta();
+  rerenderAfterSync();
+}
+function syncChanged(){
+  if(!SM.key) return;
+  SM.dirty = true; saveMeta();
+  clearTimeout(SY.timer); SY.timer = setTimeout(()=>syncNow(), 900);
+  paintSync();
+}
+async function pullState(){
+  const r = await api('/?known=' + SM.rev);
+  if(r.status!==200 || !r.body) return badResponse(r);
+  if(r.body.unchanged){ SM.lastSyncAt = Date.now(); saveMeta(); return true; }
+  const rev = Number(r.body.revision)||0;
+  if(rev > SM.rev && r.body.data){ applyRemote(r.body.data, rev); return true; }
+  if(rev !== SM.rev){ /* the cloud copy was reset: upload ours on top */ SM.rev = rev; SM.dirty = true; saveMeta(); return pushState(); }
+  SM.lastSyncAt = Date.now(); saveMeta();
+  return true;
+}
+async function pushState(){
+  for(let attempt=0; attempt<3; attempt++){
+    const sent = JSON.stringify(S);
+    const r = await api('/', { method:'PUT', body:{ data: JSON.parse(sent), baseRevision: SM.rev } });
+    if(r.status===200 && r.body){
+      SM.rev = Number(r.body.revision)||SM.rev; SM.baseIds = collectIds(JSON.parse(sent)); SM.lastSyncAt = Date.now();
+      SM.dirty = JSON.stringify(S) !== sent; /* edited again while uploading */
+      saveMeta();
+      if(SM.dirty) SY.again = true;
+      return true;
+    }
+    if(r.status===409 && r.body){
+      /* another device saved first: combine and try again */
+      if(r.body.data){ S = mergeStates(r.body.data, S, SM.baseIds); saveLocal(); rerenderAfterSync(); }
+      SM.rev = Number(r.body.revision)||0; saveMeta();
+      continue;
+    }
+    return badResponse(r);
+  }
+  setSyncStatus('error', 'Couldn’t combine changes. It will retry.');
+  return false;
+}
+async function syncNow(){
+  if(!SM.key) return;
+  if(SY.busy){ SY.again = true; return; }
+  SY.busy = true; clearTimeout(SY.timer);
+  setSyncStatus('busy');
+  try{
+    const ok = SM.dirty ? await pushState() : await pullState();
+    if(ok) setSyncStatus('ok');
+    if(ok) imgSyncSoon();
+  }catch(e){
+    setSyncStatus('offline');
+  }finally{
+    SY.busy = false;
+    if(SY.again && SY.status!=='auth'){ SY.again = false; setTimeout(syncNow, 60); }
+  }
+}
+
+/* First connection on this device */
+async function connectSync(passcode){
+  passcode = (passcode||'').trim();
+  if(!passcode) return toast('Enter your passcode');
+  let r;
+  try{ r = await api('/', { key: passcode }); }
+  catch(e){ return toast('Can’t reach the sync service. Check your connection.'); }
+  if(r.status===401) return toast('That passcode is wrong');
+  if(r.status===429) return toast('Too many wrong tries. Wait 5 minutes.');
+  if(r.status!==200 || !r.body) return toast('Sync service error ('+r.status+')');
+  const cloudRev = Number(r.body.revision)||0;
+  const cloud = cloudRev > 0 ? normalize(r.body.data) : null;
+  const hasCloud = !!(cloud && (cloud.accounts.length || cloud.trades.length || cloud.missed.length));
+  const hasLocal = !!(S.accounts.length || S.trades.length || S.missed.length);
+  const start = (rev, dirty) => { SM = blankMeta(); SM.key = passcode; SM.rev = rev; SM.dirty = dirty; saveMeta(); paintSync(); };
+
+  if(!hasCloud){
+    start(cloudRev, true);
+    toast(hasLocal ? 'Connected · uploading this device' : 'Connected');
+    if(UI.tab==='settings') renderSettings();
+    syncNow();
+    return;
+  }
+  if(!hasLocal){
+    start(cloudRev, false);
+    applyRemote(cloud, cloudRev);
+    setSyncStatus('ok'); toast('Connected · journal loaded'); imgSyncSoon();
+    if(UI.tab==='settings') renderSettings();
+    return;
+  }
+  /* both sides have a journal: ask */
+  const cnt = d => `${d.trades.length} trade${d.trades.length===1?'':'s'}, ${d.missed.length} missed, ${d.accounts.length} account${d.accounts.length===1?'':'s'}`;
+  openSheet(`
+    <h3>Which journal should we keep?</h3>
+    <p class="desc"><b>Cloud:</b> ${cnt(cloud)}<br><b>This device:</b> ${cnt(S)}</p>
+    <button class="btn-primary" id="sy-cloud" style="margin-top:4px">${I.dl}Use the cloud copy</button>
+    <p class="missed-note" style="margin-bottom:6px">Replaces what’s on this device. Best if you’ve already uploaded your journal from another device.</p>
+    <button class="btn-soft" id="sy-both" style="width:100%;margin-top:10px">Combine both</button>
+    <p class="missed-note" style="margin-bottom:6px">Keeps every entry from both. Entries that are on both keep the newer edit.</p>
+    <button class="btn-soft" id="sy-mine" style="width:100%;margin-top:10px">${I.ul}Replace the cloud with this device</button>
+    <p class="missed-note">Uploads this device and overwrites the cloud copy.</p>
+  `);
+  document.getElementById('sy-cloud').onclick = ()=> closeSheet(()=>{ start(cloudRev,false); applyRemote(cloud, cloudRev); setSyncStatus('ok'); toast('Cloud copy loaded'); imgSyncSoon(); if(UI.tab==='settings') renderSettings(); });
+  document.getElementById('sy-both').onclick = ()=> closeSheet(()=>{ S = mergeStates(cloud, S, []); saveLocal(); start(cloudRev,true); toast('Combining…'); syncNow(); render(); });
+  document.getElementById('sy-mine').onclick = ()=> closeSheet(()=>{ start(cloudRev,true); toast('Uploading this device…'); syncNow(); if(UI.tab==='settings') renderSettings(); });
+}
+function disconnectSync(){
+  SM = blankMeta(); saveMeta(); setSyncStatus('off');
+}
+
+/* ============================================================
+   SCREENSHOTS — stored on the device (IndexedDB), copied to Neon
+   ============================================================ */
+const IMG_MAX_PER_ENTRY = 12;
+let idbP = null;
+function idb(){
+  if(idbP) return idbP;
+  idbP = new Promise((res, rej)=>{
+    const rq = indexedDB.open('tradetrackr-images', 1);
+    rq.onupgradeneeded = ()=>{ const db = rq.result; db.createObjectStore('img', {keyPath:'id'}); db.createObjectStore('pending', {keyPath:'id'}); };
+    rq.onsuccess = ()=> res(rq.result);
+    rq.onerror = ()=> rej(rq.error);
+  });
+  return idbP;
+}
+async function idbDo(store, mode, fn){
+  const db = await idb();
+  return new Promise((res, rej)=>{
+    const tx = db.transaction(store, mode); let out;
+    const r = fn(tx.objectStore(store)); if(r) r.onsuccess = ()=>{ out = r.result; };
+    tx.oncomplete = ()=> res(out); tx.onerror = ()=> rej(tx.error); tx.onabort = ()=> rej(tx.error);
+  });
+}
+const imgGet = id => idbDo('img','readonly', st=>st.get(id));
+const imgPutRec = rec => idbDo('img','readwrite', st=>st.put(rec));
+const imgDelRec = id => idbDo('img','readwrite', st=>st.delete(id));
+const imgKeys = () => idbDo('img','readonly', st=>st.getAllKeys());
+const pendAdd = id => idbDo('pending','readwrite', st=>st.put({id}));
+const pendDel = id => idbDo('pending','readwrite', st=>st.delete(id));
+const pendKeys = () => idbDo('pending','readonly', st=>st.getAllKeys());
+const imgClearAll = async () => { await idbDo('img','readwrite', st=>st.clear()); await idbDo('pending','readwrite', st=>st.clear()); };
+
+function bufToB64(buf){ const b = new Uint8Array(buf); let s = ''; for(let i=0;i<b.length;i+=0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i+0x8000)); return btoa(s); }
+function b64ToBuf(b64){ const s = atob(b64); const out = new Uint8Array(s.length); for(let i=0;i<s.length;i++) out[i] = s.charCodeAt(i); return out.buffer; }
+
+/* Shrink to at most 1800px on the long side and re-save as JPEG (this also drops photo location data). */
+async function compressImage(file){
+  const MAX = 1800;
+  let src = null, w = 0, h = 0, url = null;
+  try{ src = await createImageBitmap(file); w = src.width; h = src.height; }
+  catch(e){
+    url = URL.createObjectURL(file);
+    src = await new Promise((res, rej)=>{ const im = new Image(); im.onload = ()=>res(im); im.onerror = ()=>rej(new Error('decode')); im.src = url; });
+    w = src.naturalWidth; h = src.naturalHeight;
+  }
+  try{
+    if(!w || !h) throw new Error('empty');
+    const k = Math.min(1, MAX/Math.max(w,h));
+    const cw = Math.round(w*k), ch = Math.round(h*k);
+    const c = document.createElement('canvas'); c.width = cw; c.height = ch;
+    const ctx = c.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,cw,ch); ctx.drawImage(src, 0, 0, cw, ch);
+    const blob = await new Promise(res=> c.toBlob(res, 'image/jpeg', .82));
+    if(!blob) throw new Error('encode');
+    return { mime:'image/jpeg', buf: await blob.arrayBuffer() };
+  } finally {
+    if(src && src.close) src.close();
+    if(url) URL.revokeObjectURL(url);
+  }
+}
+
+const IMG_URLS = new Map(), IMG_DL = new Map();
+async function imgDownload(id){
+  if(!SM.key) return null;
+  if(IMG_DL.has(id)) return IMG_DL.get(id);
+  const p = (async()=>{
+    try{
+      const r = await api('/img/'+id);
+      if(r.status!==200 || !r.body || !r.body.b64) return null;
+      const rec = { id, mime:r.body.mime, buf:b64ToBuf(r.body.b64), at:Date.now() };
+      await imgPutRec(rec); return rec;
+    }catch(e){ return null; }
+    finally{ IMG_DL.delete(id); }
+  })();
+  IMG_DL.set(id, p); return p;
+}
+async function imgURL(id){
+  if(IMG_URLS.has(id)) return IMG_URLS.get(id);
+  let rec = null; try{ rec = await imgGet(id); }catch(e){}
+  if(!rec) rec = await imgDownload(id);
+  if(!rec) return null;
+  const u = URL.createObjectURL(new Blob([rec.buf], {type:rec.mime}));
+  IMG_URLS.set(id, u); return u;
+}
+
+/* Delete queue: ids to remove from the cloud, kept until the delete succeeds */
+const delQueue = () => { try{ return JSON.parse(localStorage.getItem('tt_img_del')||'[]'); }catch(e){ return []; } };
+const setDelQueue = q => { try{ localStorage.setItem('tt_img_del', JSON.stringify(q)); }catch(e){} };
+function forgetImages(ids){
+  ids = (ids||[]).filter(Boolean); if(!ids.length) return;
+  ids.forEach(id=>{
+    imgDelRec(id).catch(()=>{}); pendDel(id).catch(()=>{});
+    const u = IMG_URLS.get(id); if(u){ URL.revokeObjectURL(u); IMG_URLS.delete(id); }
+  });
+  if(SM.key){ const q = delQueue(); ids.forEach(id=>{ if(!q.includes(id)) q.push(id); }); setDelQueue(q); imgSyncSoon(); }
+}
+const referencedImages = () => { const s = new Set(); [...S.trades, ...S.missed].forEach(t=> (t.images||[]).forEach(id=>s.add(id))); return s; };
+
+let imgSyncBusy = false, imgSyncTimer = null;
+function imgSyncSoon(){ clearTimeout(imgSyncTimer); imgSyncTimer = setTimeout(imgSync, 400); }
+async function imgSync(){
+  if(!SM.key || imgSyncBusy) return;
+  imgSyncBusy = true;
+  try{
+    for(const id of delQueue()){
+      const r = await api('/img/'+id, {method:'DELETE'});
+      if(r.status===200 || r.status===404) setDelQueue(delQueue().filter(x=>x!==id)); else break;
+    }
+    const refs = referencedImages();
+    for(const id of await pendKeys()){
+      if(!refs.has(id)) continue;
+      const rec = await imgGet(id); if(!rec){ await pendDel(id); continue; }
+      const r = await api('/img/'+id, {method:'PUT', body:{ mime:rec.mime, b64:bufToB64(rec.buf) }});
+      if(r.status===200) await pendDel(id);
+      else { if(r.status===401) setSyncStatus('auth'); break; }
+    }
+    /* keep recent screenshots on this device so they open offline */
+    const have = new Set(await imgKeys());
+    const cutoff = new Date(Date.now() - 60*86400000).toISOString().slice(0,10);
+    const recent = [...S.trades, ...S.missed].filter(t=>t.date>=cutoff).sort((a,b)=> a.date<b.date?1:-1).flatMap(t=>t.images||[]).filter(id=>!have.has(id)).slice(0, 24);
+    for(const id of recent) await imgDownload(id);
+  }catch(e){}
+  finally{ imgSyncBusy = false; if(UI.tab==='settings') paintImgCount(); }
+}
+async function paintImgCount(){
+  const el = document.getElementById('sync-imgs'); if(!el) return;
+  try{
+    const refs = referencedImages();
+    const pend = (await pendKeys()).filter(id=>refs.has(id)).length;
+    el.textContent = refs.size + ' screenshot' + (refs.size===1?'':'s') + ' in your journal' + (SM.key && pend ? ' · ' + pend + ' waiting to upload' : '');
+  }catch(e){ el.textContent = ''; }
+}
+/* Remove screenshots on this device that no entry uses (e.g. a form that was never saved) */
+async function gcImages(){
+  try{
+    const keep = referencedImages();
+    if(UI.form && UI.form.images) UI.form.images.forEach(id=>keep.add(id));
+    for(const id of await imgKeys()) if(!keep.has(id)){ await imgDelRec(id); await pendDel(id); }
+  }catch(e){}
+}
+
+/* Add picked files to the open form */
+async function addFormImages(files){
+  const f = UI.form; if(!f) return;
+  f.images = f.images || [];
+  let list = [...files].filter(x=> /^image\//.test(x.type) || /\.(heic|heif|jpe?g|png|webp|gif)$/i.test(x.name));
+  const room = IMG_MAX_PER_ENTRY - f.images.length;
+  if(list.length > room){ toast('Up to '+IMG_MAX_PER_ENTRY+' screenshots per entry'); list = list.slice(0, Math.max(0, room)); }
+  if(!list.length) return;
+  f.imgBusy = (f.imgBusy||0) + list.length; rerenderForm(f);
+  for(const file of list){
+    try{
+      const c = await compressImage(file);
+      const id = uid();
+      await imgPutRec({ id, mime:c.mime, buf:c.buf, at:Date.now() });
+      await pendAdd(id);
+      f.images.push(id);
+    }catch(e){ toast('Couldn’t read '+(file.name||'that image')); }
+    f.imgBusy--; rerenderForm(f);
+  }
+}
+function rerenderForm(f){ if(UI.form===f && UI.tab==='add'){ const y = window.scrollY; renderAdd(); window.scrollTo({top:y}); } }
+
+/* Fill <img data-img="id"> as they scroll into view */
+let imgIO = null;
+function hydrateImages(root){
+  const els = (root||document).querySelectorAll('img[data-img]:not([data-h])');
+  if(!els.length) return;
+  if(!imgIO && 'IntersectionObserver' in window) imgIO = new IntersectionObserver(es=> es.forEach(e=>{ if(e.isIntersecting){ imgIO.unobserve(e.target); loadImgEl(e.target); } }), {rootMargin:'250px'});
+  els.forEach(el=>{ el.dataset.h = '1'; if(imgIO) imgIO.observe(el); else loadImgEl(el); });
+}
+async function loadImgEl(el){
+  const u = await imgURL(el.dataset.img);
+  if(u){ el.onload = ()=> el.classList.add('ready'); el.src = u; }
+  else el.alt = 'Not available yet';
+}
+let hydrateQueued = false;
+new MutationObserver(()=>{ if(hydrateQueued) return; hydrateQueued = true; requestAnimationFrame(()=>{ hydrateQueued = false; hydrateImages(document); }); })
+  .observe(document.body, {childList:true, subtree:true});
+
+/* Full-screen viewer */
+const V = { ids:[], i:0, open:false, closing:false };
+const viewerEl = document.getElementById('viewer'), vImg = document.getElementById('v-img'), vMsg = document.getElementById('v-msg');
+function openViewer(ids, i){
+  if(!ids || !ids.length) return;
+  V.ids = ids; V.i = i||0; V.open = true;
+  viewerEl.classList.add('open');
+  history.pushState(Object.assign({}, history.state||{}, {viewer:1}), '', location.hash);
+  showViewer();
+}
+async function showViewer(){
+  const id = V.ids[V.i];
+  vImg.hidden = true; vImg.removeAttribute('src'); vMsg.hidden = false; vMsg.textContent = 'Loading…';
+  document.getElementById('v-prev').hidden = V.i<=0;
+  document.getElementById('v-next').hidden = V.i>=V.ids.length-1;
+  document.getElementById('v-count').textContent = V.ids.length>1 ? (V.i+1)+' / '+V.ids.length : '';
+  const u = await imgURL(id);
+  if(V.ids[V.i]!==id) return;
+  if(u){ vImg.src = u; vImg.hidden = false; vMsg.hidden = true; }
+  else vMsg.textContent = SM.key ? 'This screenshot hasn’t reached this device yet. Try again after it syncs.' : 'This screenshot is on another device. Connect sync to see it here.';
+}
+function closeViewer(){
+  if(!V.open) return;
+  V.open = false; viewerEl.classList.remove('open');
+  if(history.state && history.state.viewer){ V.closing = true; history.back(); }
+}
+function stepViewer(d){ const n = V.i + d; if(n>=0 && n<V.ids.length){ V.i = n; showViewer(); } }
+viewerEl.addEventListener('click', e=>{
+  if(e.target.closest('#v-prev')) return stepViewer(-1);
+  if(e.target.closest('#v-next')) return stepViewer(1);
+  closeViewer();
+});
+(function(){
+  let x0 = null, y0 = 0;
+  viewerEl.addEventListener('touchstart', e=>{ if(e.touches.length===1){ x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; } }, {passive:true});
+  viewerEl.addEventListener('touchend', e=>{
+    if(x0===null) return; const t = e.changedTouches[0]; const dx = t.clientX-x0, dy = t.clientY-y0; x0 = null;
+    if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)*1.5){ e.preventDefault(); stepViewer(dx<0 ? 1 : -1); }
+  });
+})();
+
+/* Thumbnails markup */
+const shotThumb = (id, removable) => `<div class="shot"><img data-img="${esc(id)}" alt="Screenshot"><button class="open" data-view="${esc(id)}" aria-label="Open screenshot"></button>${removable?`<button class="rm" data-rm-img="${esc(id)}" aria-label="Remove screenshot">${I.x}</button>`:''}</div>`;
+const rowThumbs = t => { const ids = t.images||[]; if(!ids.length) return ''; return `<span class="row-thumbs">${ids.slice(0,3).map(id=>`<span><img data-img="${esc(id)}" alt=""></span>`).join('')}${ids.length>3?`<em>+${ids.length-3}</em>`:''}</span>`; };
+
+/* ============================================================
    NAV + BACK BUTTON + BOOT
    ============================================================ */
 function nav(tab, fromPop){
@@ -2143,6 +2962,9 @@ document.querySelectorAll('[data-nav]').forEach(b=> b.addEventListener('click', 
 /* Android/browser back: close open sheet first, then step back through tabs.
    Only backing out of the first screen exits the app. */
 window.addEventListener('popstate', e=>{
+  /* the screenshot viewer sits on its own history step */
+  if(V.closing){ V.closing = false; return; }
+  if(V.open){ V.open = false; viewerEl.classList.remove('open'); return; }
   /* a sheet was closed by closeSheet(): run what was waiting on it */
   if(sheetClosing){
     sheetClosing = false;
@@ -2174,12 +2996,46 @@ function toast(msg){
   clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
 }
 
+/* Keyboard: Esc closes, arrows step screenshots, and on Add entry the number keys drive the calculator */
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){
+    if(V.open){ closeViewer(); return; }
+    if(backdrop.classList.contains('open')){ closeSheet(); return; }
+  }
+  if(V.open){ if(e.key==='ArrowLeft') stepViewer(-1); else if(e.key==='ArrowRight') stepViewer(1); return; }
+  if(UI.tab!=='add' || backdrop.classList.contains('open') || e.metaKey || e.ctrlKey || e.altKey) return;
+  const t = e.target;
+  if(t && t.closest && t.closest('input,textarea,select,[contenteditable="true"]')) return;
+  if(e.key==='Enter' && t && t.closest && t.closest('button')) return;
+  const map = {'+':'plus','-':'minus','Backspace':'bs','Enter':'eq','=':'eq','.':'.',',':'.','Delete':'clr'};
+  const k = /^[0-9]$/.test(e.key) ? e.key : map[e.key];
+  if(!k) return;
+  const b = document.querySelector('#keypad [data-k="'+k+'"]');
+  if(b){ e.preventDefault(); b.click(); }
+});
+document.getElementById('img-file').addEventListener('change', e=>{
+  const files = e.target.files; if(files && files.length) addFormImages(files);
+  e.target.value = '';
+});
+document.getElementById('sync-pill').addEventListener('click', ()=> nav('settings'));
+/* re-lay out calendar and stats when crossing the tablet/desktop width */
+const onWide = ()=>{ if(UI.tab==='calendar' || UI.tab==='stats') render(); };
+if(WIDE.addEventListener) WIDE.addEventListener('change', onWide); else if(WIDE.addListener) WIDE.addListener(onWide);
+/* sync triggers */
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') syncNow(); });
+window.addEventListener('online', ()=> syncNow());
+window.addEventListener('offline', ()=>{ if(SM.key) setSyncStatus('offline'); });
+setInterval(()=>{ if(document.visibilityState==='visible' && SM.key && !SY.busy) syncNow(); else paintSync(); }, 45000);
+
 history.replaceState({tab:'calendar'}, '', '#calendar');
 {
   const DOW = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
   document.getElementById('hdr-date').textContent = DOW[now.getDay()] + ' · ' + now.getDate() + ' ' + MONTHS_S[now.getMonth()] + ' ' + now.getFullYear();
 }
 nav('calendar', true);
+paintSync();
+if(SM.key) syncNow();
+setTimeout(gcImages, 8000);
 </script>
 </body>
 </html>

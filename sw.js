@@ -1,4 +1,4 @@
-const CACHE = 'tradetrackr-v9';
+const CACHE = 'tradetrackr-online-v1';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -16,9 +16,11 @@ self.addEventListener('activate', e => {
   );
 });
 
-// Cache-first, refresh in background (stale-while-revalidate)
+// App files only: cache-first, refresh in background (stale-while-revalidate).
+// Sync calls go to another site and must never be cached, so they pass straight through.
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  if (new URL(e.request.url).origin !== self.location.origin) return;
   e.respondWith(
     caches.match(e.request).then(cached => {
       const fresh = fetch(e.request).then(res => {
