@@ -213,6 +213,7 @@ h1,h2,h3{font-weight:600;letter-spacing:-.01em}
 .field input,.field textarea,.field select{flex:1;background:none;border:0;outline:0;padding:11px 0;font-size:.95rem;color:var(--ink-dark);min-width:0;color-scheme:dark}
 .field textarea{resize:none;min-height:84px;line-height:1.45;overflow-y:auto}
 .field svg{width:17px;height:17px;stroke:var(--ink-dark-dim)}
+.dt-row{display:grid;grid-template-columns:1.35fr 1fr;gap:8px}
 input::placeholder,textarea::placeholder{color:var(--ink-faint)}
 
 /* pnl calculator */
@@ -559,6 +560,15 @@ const LS_KEY = 'tradetrackr_online_v1';
 const LS_KEY_OLD = 'tradetrackr_v1'; /* the original app's key: copied over once if found on this device */
 const uid = () => Math.random().toString(36).slice(2, 9) + Date.now().toString(36);
 const todayISO = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); };
+/* Entry times are Singapore time (UTC+8, no daylight saving), whatever timezone the device is in */
+const SGT_MS = 8*3600e3;
+const sgtISO = () => new Date(Date.now()+SGT_MS).toISOString();
+const todaySGT = () => sgtISO().slice(0,10);
+const nowSGT = () => sgtISO().slice(11,16);
+const validTime = v => typeof v==='string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(v);
+const maxEntryDate = () => { const a = todayISO(), b = todaySGT(); return a>b ? a : b; };
+/* When an entry happened: its SGT date + time, or when it was saved if it has no time */
+const whenTs = t => validTime(t.time) ? Date.parse(t.date+'T'+t.time+':00+08:00') : (t.createdAt||0);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const cleanNum = v => { const p = String(v).replace(/[^0-9.]/g,'').split('.'); return p.shift() + (p.length ? '.'+p.join('') : ''); };
 
@@ -595,15 +605,17 @@ const PIP_SIZE = { XAUUSD: 0.1 };
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MONTHS_S = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
-/* Why a missed trade wasn't taken */
+/* What a log is for (stored in t.reason; the older missed-trade reasons stay so old entries keep their label) */
 const MISSED_REASONS = [
+  ['forward','Forward test'],
+  ['analysis','Analysis'],
   ['fear','Hesitated / scared'],
   ['unsure','Not sure of setup'],
   ['away','Away from screen'],
   ['ran','Price ran without me'],
   ['other','Other']
 ];
-const reasonLabel = k => (MISSED_REASONS.find(r=>r[0]===k)||[null,'No reason given'])[1];
+const reasonLabel = k => (MISSED_REASONS.find(r=>r[0]===k)||[null,'No type'])[1];
 
 function blankState(){
   return { v:3, accounts:[], assets:[...DEFAULT_ASSETS], tags:[...DEFAULT_TAGS], tagGroups:{}, trades:[], missed:[], txns:[], settings:{ defaultAccountId:null, defaultAsset:'XAUUSD', beThreshold:0, lastBackupAt:null } };
@@ -708,6 +720,7 @@ const I = {
   wallet:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>',
   dl:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
   ul:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>',
+  clock:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>',
   cal:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
   note:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>',
   target:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>',
@@ -770,7 +783,7 @@ function renderCalendar(){
     const dd = days[d], md = mdays[d];
     const iso = y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
     const isToday = iso===tISO;
-    const mk = md ? `<span class="mk" aria-label="${md.n} missed">${md.n}</span>` : '';
+    const mk = md ? `<span class="mk" aria-label="${md.n} log${md.n===1?'':'s'}">${md.n}</span>` : '';
     if(dd){
       week.pnl += dd.pnl; week.n += dd.n;
       const thr = Math.abs(S.settings.beThreshold||0);
@@ -780,7 +793,7 @@ function renderCalendar(){
       </button>`;
     } else if(md){
       cells += `<button class="cal-cell missed-only ${isToday?'today':''}" data-day="${iso}">
-        <span class="d">${d}</span><span class="p" style="color:var(--gold-1)">—</span><span class="c">${md.n} missed</span>
+        <span class="d">${d}</span><span class="p" style="color:var(--gold-1)">—</span><span class="c">${md.n} log${md.n===1?'':'s'}</span>
       </button>`;
     } else {
       cells += `<div class="cal-cell ${isToday?'today':''}"><span class="d">${d}</span></div>`;
@@ -819,7 +832,7 @@ function renderCalendar(){
     <div class="cal-sum" style="font-size:1.25rem;font-weight:700;color:${monthPnl>0?'var(--green)':monthPnl<0?'var(--red)':'var(--ink)'}">${money(monthPnl,true)}</div></div>
     <div style="text-align:center">${lab('Trades')}
     <div class="cal-sum" style="font-size:1.25rem;font-weight:700">${monthN}</div></div>
-    <div style="text-align:right">${lab('Missed')}
+    <div style="text-align:right">${lab('Logs')}
     <div class="cal-sum" style="font-size:1.25rem;font-weight:700;color:${missedMonth?'var(--gold-1)':'var(--ink-faint)'}">${missedMonth}</div></div>
   </div>`;
   /* wide screens: a few more numbers beside the calendar */
@@ -838,7 +851,7 @@ function renderCalendar(){
       ${row('Worst day', worst ? worst.d+' '+MONTHS_S[m].charAt(0)+MONTHS_S[m].slice(1).toLowerCase()+' · '+money(worst.pnl,true) : '—', worst&&worst.pnl<0?'var(--red)':null)}
     </div>`;
   }
-  const legend = missedMonth ? `<div class="cal-legend"><span><i style="border:1px dashed var(--gold-1)"></i>${wide?'':'<i style="width:7px;height:7px;border-radius:50%;background:var(--gold-1)"></i>'}Missed trade (not counted)</span></div>` : '';
+  const legend = missedMonth ? `<div class="cal-legend"><span><i style="border:1px dashed var(--gold-1)"></i>${wide?'':'<i style="width:7px;height:7px;border-radius:50%;background:var(--gold-1)"></i>'}Log (not counted)</span></div>` : '';
   const hint = (monthN||missedMonth) ? `<p style="font-size:.72rem;color:var(--ink-dark-dim);margin:10px 4px 0;text-align:center">${wide?'Click':'Tap'} a day to review it.</p>` : '';
   el.innerHTML = head + (wide
     ? `<div class="cal-layout"><div>${monthRow}<div class="cal-grid">${cells}</div>${legend}${hint}</div><div class="cal-side">${summary}${extra}</div></div>`
@@ -853,15 +866,15 @@ function renderCalendar(){
 
 function openDaySheet(iso, opts){
   const aid = UI.statsAccountId;
-  const trades = S.trades.filter(t=>t.accountId===aid && t.date===iso).sort((a,b)=>b.createdAt-a.createdAt);
-  const missedList = S.missed.filter(t=>t.accountId===aid && t.date===iso).sort((a,b)=>b.createdAt-a.createdAt);
+  const trades = S.trades.filter(t=>t.accountId===aid && t.date===iso).sort((a,b)=>whenTs(b)-whenTs(a));
+  const missedList = S.missed.filter(t=>t.accountId===aid && t.date===iso).sort((a,b)=>whenTs(b)-whenTs(a));
   const dayPnl = trades.reduce((s,t)=>s+tradePnl(t),0);
   openSheet(`
     <h3>${relDay(iso)}</h3>
-    <p class="desc">${trades.length ? `${trades.length} trade${trades.length===1?'':'s'} · Day PnL <b style="color:${dayPnl>0?'var(--green-deep)':dayPnl<0?'var(--red-deep)':'inherit'}">${money(dayPnl,true)}</b>` : 'No trades taken'}${missedList.length ? ' · '+missedList.length+' missed' : ''}</p>
+    <p class="desc">${trades.length ? `${trades.length} trade${trades.length===1?'':'s'} · Day PnL <b style="color:${dayPnl>0?'var(--green-deep)':dayPnl<0?'var(--red-deep)':'inherit'}">${money(dayPnl,true)}</b>` : 'No trades taken'}${missedList.length ? ' · '+missedList.length+' log'+(missedList.length===1?'':'s') : ''}</p>
     <div>
     ${trades.map(t=> tradeRowHTML(t, t.layers.length>1 ? t.layers.length+' layers' : '')).join('')}
-    ${missedList.length ? `<div class="sub-head"><span>Missed · not taken</span><span style="color:var(--ink-faint)">not counted</span></div>${missedList.map(t=>tradeRowHTML(t,'')).join('')}` : ''}
+    ${missedList.length ? `<div class="sub-head"><span>Logs</span><span style="color:var(--ink-faint)">not counted</span></div>${missedList.map(t=>tradeRowHTML(t,'')).join('')}` : ''}
     </div>
   `, opts);
   sheetEl.querySelectorAll('.trade-row').forEach(r=> r.onclick = ()=>{
@@ -1138,16 +1151,16 @@ function renderStats(){
 `,
     missed: `
   <div class="card-navy">
-    <div class="card-title"><h3>Missed trades</h3><span class="sub">${MONTHS_S[m]} ${y}</span></div>
+    <div class="card-title"><h3>Logs</h3><span class="sub">${MONTHS_S[m]} ${y}</span></div>
     ${mm.length ? `
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:8px">
-      <div><div class="cal-sum" style="font-size:1.35rem;font-weight:700;color:var(--gold-1)">${mm.length}</div><div style="font-size:.7rem;color:var(--ink-faint)">not taken</div></div>
+      <div><div class="cal-sum" style="font-size:1.35rem;font-weight:700;color:var(--gold-1)">${mm.length}</div><div style="font-size:.7rem;color:var(--ink-faint)">logged</div></div>
       <div style="text-align:right"><div class="cal-sum" style="font-size:1.1rem;font-weight:700;color:${mmWith.length ? (mmSum>0?'var(--green)':mmSum<0?'var(--red)':'var(--ink)') : 'var(--ink-faint)'}">${mmWith.length ? money(mmSum,true) : '—'}</div>
       <div style="font-size:.7rem;color:var(--ink-faint)">${mmWith.length ? 'would have made · '+mmWith.length+' with a result' : 'add a would-have result to see this'}</div></div>
     </div>
     ${mmReasons.map(([k,n])=>`<div class="reason-row"><span class="lab">${esc(reasonLabel(k))}</span><span class="bar"><i style="width:${n/mm.length*100}%"></i></span><b>${n}</b></div>`).join('')}
     <button class="combo-more" data-missed-open style="margin-top:10px">See them in History</button>
-    ` : `<div class="empty-chart">No missed trades this month. When you skip a setup, open Add entry and switch to Missed.</div>`}
+    ` : `<div class="empty-chart">No logs this month. To log a setup for forward testing or analysis, open Add entry and switch to Log.</div>`}
   </div>
 `
   };
@@ -1194,7 +1207,7 @@ function emptyOnboard(){
 function equitySVG(aid){
   const a = acct(aid);
   const events = [
-    ...S.trades.filter(t=>t.accountId===aid).map(t=>({date:t.date, ts:t.createdAt||0, amt:tradePnl(t)})),
+    ...S.trades.filter(t=>t.accountId===aid).map(t=>({date:t.date, ts:whenTs(t), amt:tradePnl(t)})),
     ...S.txns.filter(x=>x.accountId===aid).map(x=>({date:x.date, ts:x.createdAt||0, amt:x.amount}))
   ].sort((p,q)=> p.date===q.date ? p.ts-q.ts : (p.date<q.date?-1:1));
   let bal = a.startingBalance || 0;
@@ -1260,13 +1273,13 @@ function monthlyBarsSVG(aid, y, m){
 function blankForm(){
   const d = defAcct();
   return { editingId:null, accountId: d ? d.id : null, asset: S.settings.defaultAsset || S.assets[0] || null,
-           direction:'buy', entries:[{sign:1, str:''}], tags:[], notes:'', date: todayISO(), kind:'taken', reason:null, images:[] };
+           direction:'buy', entries:[{sign:1, str:''}], tags:[], notes:'', date: todaySGT(), time: nowSGT(), kind:'taken', reason:null, images:[] };
 }
 function formFromTrade(t){
   const layers = t.layers||[];
   return { editingId:t.id, accountId:t.accountId, asset:t.asset, direction:t.direction,
     entries: layers.length ? layers.map(v=>({sign: v<0?-1:1, str: String(Math.abs(v))})) : [{sign:1, str:''}],
-    tags:[...(t.tags||[])], notes:t.notes||'', date:t.date,
+    tags:[...(t.tags||[])], notes:t.notes||'', date:t.date, time: validTime(t.time) ? t.time : '', whenTouched:true,
     kind: t.missed ? 'missed' : 'taken', reason: t.reason||null, images:[...(t.images||[])] };
 }
 const calcNet = f => f.entries.reduce((s,e)=> s + (e.sign * (parseFloat(e.str)||0)), 0);
@@ -1329,7 +1342,7 @@ function partStat(list, group, key){
 function openFixSheet(opts){
   const aid = UI.statsAccountId;
   const list = S.trades.filter(t=>t.accountId===aid && parseJournal(t).problem)
-    .sort((a,b)=> a.date===b.date ? (b.createdAt-a.createdAt) : (a.date<b.date?1:-1));
+    .sort((a,b)=> a.date===b.date ? (whenTs(b)-whenTs(a)) : (a.date<b.date?1:-1));
   if(!list.length) return false;
   openSheet(`
     <h3>Journal numbers to check</h3>
@@ -1357,7 +1370,7 @@ function openComboSheet(id, opts){
   const c = cs.rows.find(x=>x.id===id);
   if(!c) return false;
   const trades = all.filter(t=>{ const p = comboParts(t); return p && p.id===id; })
-    .sort((a,b)=> a.date===b.date ? (b.createdAt-a.createdAt) : (a.date<b.date?1:-1));
+    .sort((a,b)=> a.date===b.date ? (whenTs(b)-whenTs(a)) : (a.date<b.date?1:-1));
   const ctx = [
     ['Level', c.level, partStat(all,'level',c.level)],
     ['Entry', c.entry, partStat(all,'entry',c.entry)]
@@ -1419,10 +1432,11 @@ function notePreview(t){
 function tradeRowHTML(t, meta){
   const multiAsset = S.assets.length>1 || S.trades.some(x=>x.asset!==t.asset);
   let pnlHTML;
+  if(validTime(t.time)) meta = [t.time, meta].filter(Boolean).join(' · ');
   if(t.missed){
     const has = (t.layers||[]).length, p = has ? tradePnl(t) : 0;
-    pnlHTML = has ? `<span class="pnl ${p>0?'pos':p<0?'neg':'be'}"><small class="would">would be</small>${money(p,true)}</span>` : `<span class="pnl none">—</span>`;
-    meta = [`<span class="reason">${esc(reasonLabel(t.reason))}</span>`, meta].filter(Boolean).join(' · ');
+    pnlHTML = has ? `<span class="pnl ${p>0?'pos':p<0?'neg':'be'}"><small class="would">paper</small>${money(p,true)}</span>` : `<span class="pnl none">—</span>`;
+    meta = [t.reason ? `<span class="reason">${esc(reasonLabel(t.reason))}</span>` : '', meta].filter(Boolean).join(' · ');
   } else {
     const p = tradePnl(t), kind = classify(t);
     const cls = kind==='win'?'pos':kind==='loss'?'neg':'be';
@@ -1431,7 +1445,7 @@ function tradeRowHTML(t, meta){
   return `<button class="trade-row ${t.missed?'missed':''}" data-id="${t.id}">
     ${multiAsset?`<span class="ava">${esc(t.asset.slice(0,3))}</span>`:''}
     <span class="mid">
-      <span class="sym">${multiAsset?esc(t.asset):''}<span class="dir-badge ${t.direction}">${t.direction.toUpperCase()}</span>${t.missed?'<span class="dir-badge missed">MISSED</span>':''}</span>
+      <span class="sym">${multiAsset?esc(t.asset):''}<span class="dir-badge ${t.direction}">${t.direction.toUpperCase()}</span>${t.missed?'<span class="dir-badge missed">LOG</span>':''}</span>
       ${meta?`<span class="meta">${meta}</span>`:''}
       ${t.tags&&t.tags.length?`<span class="tagrow">${t.tags.map(tg=>`<span class="mini-tag">${esc(tg)}</span>`).join('')}</span>`:''}
       ${notePreview(t)?`<span class="note">${esc(notePreview(t))}</span>`:''}
@@ -1445,7 +1459,7 @@ function openSetupSheet(sel, opts){
   const aid = UI.statsAccountId, y = UI.statsY, m = UI.statsM;
   const pool = sel.range==='all' ? S.trades.filter(t=>t.accountId===aid) : monthTrades(aid, y, m);
   const trades = pool.filter(t=>setupMatch(t, sel.group, sel.key, sel.none))
-    .sort((a,b)=> a.date===b.date ? (b.createdAt-a.createdAt) : (a.date<b.date?1:-1));
+    .sort((a,b)=> a.date===b.date ? (whenTs(b)-whenTs(a)) : (a.date<b.date?1:-1));
   if(!trades.length) return false;
   const w = trades.filter(t=>classify(t)==='win').length, l = trades.filter(t=>classify(t)==='loss').length, be = trades.length-w-l;
   const pnl = trades.reduce((s,t)=>s+tradePnl(t),0);
@@ -1512,18 +1526,20 @@ function renderAdd(){
   if(!acct(f.accountId)) f.accountId = defAcct().id;
   const net = calcNet(f);
   const editing = !!f.editingId;
+  /* a new entry keeps "now" until you change the date or time yourself */
+  if(!editing && !f.whenTouched){ f.date = todaySGT(); f.time = nowSGT(); }
 
   const missed = f.kind==='missed';
   const imgs = f.images || [];
   el.innerHTML = `
-  <h2 style="font-size:1.3rem;margin:4px 2px 6px">${editing ? (missed?'Edit missed trade':'Edit trade') : 'New entry'}</h2>
+  <h2 style="font-size:1.3rem;margin:4px 2px 6px">${editing ? (missed?'Edit log':'Edit trade') : 'New entry'}</h2>
   <p style="font-size:.82rem;color:var(--ink-dark-dim);margin:0 2px">${editing?'Update the details below.':'Log it while the details are fresh.'}</p>
 
   <div class="kind-seg" role="group" aria-label="Entry type">
     <button data-kind="taken" class="${!missed?'on':''}" aria-pressed="${!missed}">${I.check}Taken</button>
-    <button data-kind="missed" class="missed ${missed?'on':''}" aria-pressed="${missed}">${I.eye}Missed</button>
+    <button data-kind="missed" class="missed ${missed?'on':''}" aria-pressed="${missed}">${I.eye}Log</button>
   </div>
-  ${missed?`<p class="missed-note">For setups you saw but didn’t take. They show on your calendar and in History, but never count toward your balance or stats.</p>`:''}
+  ${missed?`<p class="missed-note">For forward testing and logging your analysis. Logs show on your calendar and in History, but never count toward your balance or stats.</p>`:''}
 
   <div class="add-grid"><div class="add-main">
   ${S.accounts.length>1 ? `<div class="section-label">Account</div>
@@ -1542,7 +1558,7 @@ function renderAdd(){
     <button class="sell ${f.direction==='sell'?'on':''}" data-dir="sell">${I.down}Sell</button>
   </div>
 
-  ${missed ? `<div class="section-label">Why I didn’t take it</div>
+  ${missed ? `<div class="section-label">Log type <span class="optional">· optional</span></div>
   <div class="chips" id="f-reason">
     ${MISSED_REASONS.map(([k,l])=>`<button class="select-chip ${f.reason===k?'on':''}" data-reason="${k}">${l}</button>`).join('')}
   </div>` : ''}
@@ -1554,7 +1570,7 @@ function renderAdd(){
     <button class="select-chip ghost" id="f-tpl">${I.plus}Template</button>
     <button class="select-chip ghost" id="f-legend">${I.note}Legend</button>
   </div>
-  <div class="field">${I.note}<textarea id="f-notes" placeholder="${missed?'What you saw, why you held back, what price did after':'Plan: 4289 SL30 TP60 — tap Template to start'}">${esc(f.notes)}</textarea></div>
+  <div class="field">${I.note}<textarea id="f-notes" placeholder="${missed?'What you saw, your plan, what price did after — tap Template to start':'Plan: 4289 SL30 TP60 — tap Template to start'}">${esc(f.notes)}</textarea></div>
 
   <div class="section-label">Screenshots <span class="optional">· optional</span></div>
   <div class="shots" id="f-shots">
@@ -1564,9 +1580,9 @@ function renderAdd(){
   </div>
   </div><div class="add-side">
 
-  <div class="section-label">${missed ? 'Would-have PnL <span class="optional">· optional</span>' : 'PnL calculator'}</div>
+  <div class="section-label">${missed ? 'Paper PnL <span class="optional">· optional</span>' : 'PnL calculator'}</div>
   <div class="calc ${missed?'missed':''}">
-    <div class="net-label">${missed ? 'Would have made' : 'Net PnL'}</div>
+    <div class="net-label">${missed ? 'Paper PnL' : 'Net PnL'}</div>
     <div class="net" id="k-net" style="color:${net>0?'var(--green)':net<0?'var(--red)':'var(--ink)'}">${money(net,true)}</div>
     <div class="expr" id="k-expr">${calcExpr(f)}</div>
     <div class="keypad" id="keypad">
@@ -1577,10 +1593,13 @@ function renderAdd(){
     </div>
   </div>
 
-  <div class="section-label">Date</div>
-  <div class="field">${I.cal}<input type="date" id="f-date" value="${f.date}" max="${todayISO()}"></div>
+  <div class="section-label">Date &amp; time <span class="optional">· SGT</span></div>
+  <div class="dt-row">
+    <div class="field">${I.cal}<input type="date" id="f-date" value="${f.date}" max="${maxEntryDate()}" aria-label="Date"></div>
+    <div class="field">${I.clock}<input type="time" id="f-time" value="${esc(f.time||'')}" aria-label="Time (SGT)"></div>
+  </div>
 
-  <button class="btn-primary" id="f-save">${I.check}${editing?'Save changes':(missed?'Save missed trade':'Save trade')}</button>
+  <button class="btn-primary" id="f-save">${I.check}${editing?'Save changes':(missed?'Save log':'Save trade')}</button>
   ${editing?`<button class="btn-danger-ghost" id="f-delete">${I.trash}${missed?'Delete entry':'Delete trade'}</button>`:''}
   </div></div>`;
 
@@ -1634,7 +1653,8 @@ function renderAdd(){
     el.querySelector('#k-expr').textContent = calcExpr(f);
   };
 
-  el.querySelector('#f-date').onchange = e=> f.date = e.target.value || todayISO();
+  el.querySelector('#f-date').onchange = e=>{ f.date = e.target.value || todaySGT(); f.whenTouched = true; };
+  el.querySelector('#f-time').onchange = e=>{ f.time = e.target.value || ''; f.whenTouched = true; };
   el.querySelector('#f-tpl').onclick = ()=>{
     if(!f.notes.trim()) f.notes = NOTE_TEMPLATE;
     else if(!/^\s*(P|Plan)\s*:/im.test(f.notes)) f.notes = NOTE_TEMPLATE + '\n' + f.notes;
@@ -1649,7 +1669,7 @@ function renderAdd(){
   growTa();
   el.querySelector('#f-save').onclick = saveTrade;
   const delBtn = el.querySelector('#f-delete');
-  if(delBtn) delBtn.onclick = ()=> confirmSheet(missed?'Delete this entry?':'Delete this trade?', missed?'This removes the missed trade and its screenshots. This can\'t be undone.':'This removes it from your journal and stats. This can\'t be undone.',()=>{
+  if(delBtn) delBtn.onclick = ()=> confirmSheet(missed?'Delete this entry?':'Delete this trade?', missed?'This removes the log and its screenshots. This can\'t be undone.':'This removes it from your journal and stats. This can\'t be undone.',()=>{
     const dest = UI.returnTo||'history';
     const orig = entryById(f.editingId);
     S.trades = S.trades.filter(t=>t.id!==f.editingId); S.missed = S.missed.filter(t=>t.id!==f.editingId);
@@ -1679,7 +1699,7 @@ function saveTrade(){
   const rec = {
     id: orig ? orig.id : uid(),
     accountId: f.accountId, asset: f.asset, direction: f.direction,
-    layers, tags: f.tags||[], notes: f.notes.trim(), date: f.date || todayISO(),
+    layers, tags: f.tags||[], notes: f.notes.trim(), date: f.date || todaySGT(), time: validTime(f.time) ? f.time : null,
     images: [...(f.images||[])],
     createdAt: orig ? (orig.createdAt || stamp) : stamp,
     updatedAt: stamp
@@ -1691,7 +1711,7 @@ function saveTrade(){
   else { if(orig) fromArr.splice(fromArr.indexOf(orig), 1); toArr.push(rec); }
   if(orig) forgetImages((orig.images||[]).filter(id=>!rec.images.includes(id)));
   const dest = f.editingId ? (UI.returnTo||'history') : 'calendar';
-  if(missed) toast(orig ? 'Entry updated' : 'Missed trade logged');
+  if(missed) toast(orig ? 'Entry updated' : 'Log saved');
   else toast(orig ? 'Trade updated' : 'Trade saved · ' + money(tradePnl(rec),true));
   save(); UI.form = null; UI.returnTo = null;
   leaveEdit(dest);
@@ -1714,7 +1734,7 @@ function renderHistory(){
   const ftag = UI.historyTag || 'all';
   const hk = UI.historyKind || 'trades';
   const source = hk==='missed' ? S.missed : S.trades;
-  let all = [...source].sort((a,b)=> a.date===b.date ? (b.createdAt-a.createdAt) : (a.date<b.date?1:-1));
+  let all = [...source].sort((a,b)=> a.date===b.date ? (whenTs(b)-whenTs(a)) : (a.date<b.date?1:-1));
   if(fid!=='all') all = all.filter(t=>t.accountId===fid);
   if(ftag!=='all') all = all.filter(t=> (t.tags||[]).includes(ftag));
 
@@ -1729,7 +1749,7 @@ function renderHistory(){
   let listHtml = '';
   if(!trades.length){
     listHtml = hk==='missed'
-      ? `<div class="empty-state">${I.eye}<p><b>${S.missed.length?'No missed trades match this filter.':'No missed trades yet.'}</b><br>${S.missed.length?'Try a different account or tag.':'When you skip a setup, open Add entry and switch to Missed.'}</p></div>`
+      ? `<div class="empty-state">${I.eye}<p><b>${S.missed.length?'No logs match this filter.':'No logs yet.'}</b><br>${S.missed.length?'Try a different account or tag.':'To log a setup for forward testing or analysis, open Add entry and switch to Log.'}</p></div>`
       : `<div class="empty-state">${I.book}<p><b>${S.trades.length?'No trades match this filter.':'Nothing on record.'}</b><br>${S.trades.length?'Try a different account or tag.':'The journal starts with the next trade you take.'}</p></div>`;
   } else {
     let curDay = null;
@@ -1737,7 +1757,7 @@ function renderHistory(){
       if(t.date !== curDay){
         curDay = t.date;
         const dayTrades = trades.filter(x=>x.date===curDay);
-        if(hk==='missed') listHtml += `<div class="day-head"><span>${relDay(curDay)}</span><span style="color:var(--gold-1)">${dayTrades.length} missed</span></div>`;
+        if(hk==='missed') listHtml += `<div class="day-head"><span>${relDay(curDay)}</span><span style="color:var(--gold-1)">${dayTrades.length} log${dayTrades.length===1?'':'s'}</span></div>`;
         else {
           const dayPnl = dayTrades.reduce((s,x)=>s+tradePnl(x),0);
           listHtml += `<div class="day-head"><span>${relDay(curDay)}</span><span class="dp" style="color:${dayPnl>0?'var(--green-deep)':dayPnl<0?'var(--red-deep)':'inherit'}">${money(dayPnl,true)}</span></div>`;
@@ -1753,7 +1773,7 @@ function renderHistory(){
   <h2 style="font-size:1.3rem;margin:4px 2px 14px">History</h2>
   <div class="kind-seg" role="group" aria-label="Show" style="margin:0 0 12px">
     <button data-hk="trades" class="${hk==='trades'?'on':''}" aria-pressed="${hk==='trades'}">Trades · ${S.trades.length}</button>
-    <button data-hk="missed" class="missed ${hk==='missed'?'on':''}" aria-pressed="${hk==='missed'}">Missed · ${S.missed.length}</button>
+    <button data-hk="missed" class="missed ${hk==='missed'?'on':''}" aria-pressed="${hk==='missed'}">Logs · ${S.missed.length}</button>
   </div>
   ${S.accounts.length>1?`<div class="filter-scroll">
     <button class="select-chip ${fid==='all'?'on':''}" data-f="all">All accounts</button>
@@ -1908,7 +1928,7 @@ function renderSettings(){
     const a = acct(b.dataset.id);
     const n = S.trades.filter(t=>t.accountId===a.id).length;
     const nm = S.missed.filter(t=>t.accountId===a.id).length;
-    confirmSheet(`Delete "${a.name}"?`, `This also deletes its ${n} trade${n===1?'':'s'}${nm?`, ${nm} missed trade${nm===1?'':'s'}`:''} and all deposits/withdrawals. This can't be undone.`, ()=>{
+    confirmSheet(`Delete "${a.name}"?`, `This also deletes its ${n} trade${n===1?'':'s'}${nm?`, ${nm} log${nm===1?'':'s'}`:''} and all deposits/withdrawals. This can't be undone.`, ()=>{
       forgetImages([...S.trades, ...S.missed].filter(t=>t.accountId===a.id).flatMap(t=>t.images||[]));
       S.accounts = S.accounts.filter(x=>x.id!==a.id);
       S.trades = S.trades.filter(t=>t.accountId!==a.id);
@@ -2421,14 +2441,25 @@ function groupedBlocks(list){
     confirmationStyle: by('confirmationStyle'), refined: by('refined'), refinement: by('refine')
   };
 }
-function exportWeekly(){
-  if(!S.trades.length) return toast('No trades to report yet');
+async function exportWeekly(){
+  if(!S.trades.length && !S.missed.length) return toast('Nothing to report yet');
   const r2 = n => Math.round(n*100)/100;
   const from = weekStartISO(), to = todayISO();
-  const week = S.trades.filter(t=> t.date>=from && t.date<=to)
-    .sort((a,b)=> a.date===b.date ? a.createdAt-b.createdAt : (a.date<b.date?-1:1));
+  const byWhen = (a,b)=> a.date===b.date ? whenTs(a)-whenTs(b) : (a.date<b.date?-1:1);
+  const week = S.trades.filter(t=> t.date>=from && t.date<=to).sort(byWhen);
+  const weekLogs = S.missed.filter(t=> t.date>=from && t.date<=to).sort(byWhen);
+  /* screenshots go in the zip, named date_time_kind_asset_direction_n so they sort in order */
+  const shots = [], used = new Set();
+  const shotNames = (t, kind) => (t.images||[]).map((id, i)=>{
+    const base = 'screenshots/' + [t.date, validTime(t.time) ? t.time.replace(':','') : 'notime', kind,
+      String(t.asset||'').replace(/[^A-Za-z0-9]+/g,'') || 'asset', t.direction, i+1].join('_');
+    let name = base + '.jpg', k = 2;
+    while(used.has(name)) name = base + '-' + (k++) + '.jpg';
+    used.add(name); shots.push({ id, name }); return name;
+  });
   const report = {
-    app:'tradetrackr', report:'weekly', version:3,
+    app:'tradetrackr', report:'weekly', version:4,
+    timezone: 'Times are Singapore time (SGT, UTC+8). time is null for entries saved before times were added.',
     journalFormat: 'Plan: entry SLpips TPpips | Before | During | Result: Best+pips Worst-pips out<price> BE@<pips in profit when stop moved to entry> | After: SL/TP/none then free text | Lesson',
     generatedAt: new Date().toISOString(),
     period: { from, to },
@@ -2450,34 +2481,79 @@ function exportWeekly(){
     allTimeComboRanking: (cs => ({ overallAvgR: r2(cs.avgR), tradesWithR: cs.withR, pullTrades: COMBO_K, edgeLeakZ: COMBO_Z, minTradesForVerdict: COMBO_MIN,
       combos: cs.rows.map((c,i)=>({ rank: i+1, combo: c.id, trades: c.n, tradesWithR: c.nR, ownAvgR: c.rawR===null ? null : r2(c.rawR),
         estimatedR: c.adjR===null ? null : r2(c.adjR), verdict: c.verdict==='edge' ? 'Edge' : c.verdict==='leak' ? 'Leak' : null })) }))(comboStats(S.trades)),
-    missedThisWeek: S.missed.filter(t=> t.date>=from && t.date<=to).sort((a,b)=> a.date<b.date?-1:a.date>b.date?1:0).map(t=>({
-      date: t.date, asset: t.asset, direction: t.direction, reason: reasonLabel(t.reason),
-      wouldHavePnl: (t.layers||[]).length ? r2(tradePnl(t)) : null, tags: t.tags||[], notes: t.notes||'', screenshots: (t.images||[]).length
+    logsThisWeek: weekLogs.map(t=>({
+      date: t.date, time: validTime(t.time) ? t.time : null, asset: t.asset, direction: t.direction,
+      type: t.reason ? reasonLabel(t.reason) : null,
+      paperPnl: (t.layers||[]).length ? r2(tradePnl(t)) : null, tags: t.tags||[], parsed: parseJournal(t), notes: t.notes||'',
+      screenshots: shotNames(t, 'log')
     })),
-    missedAllTimeByReason: S.missed.reduce((o,t)=>{ const k = reasonLabel(t.reason); o[k] = (o[k]||0)+1; return o; }, {}),
+    logsAllTimeByType: S.missed.reduce((o,t)=>{ const k = t.reason ? reasonLabel(t.reason) : '(no type)'; o[k] = (o[k]||0)+1; return o; }, {}),
     thisWeekByDirection: groupBlock(week, t=>[t.direction]),
     allTimeByDirection: groupBlock(S.trades, t=>[t.direction]),
     trades: week.map(t=>({
-      date: t.date, asset: t.asset, direction: t.direction,
+      date: t.date, time: validTime(t.time) ? t.time : null, asset: t.asset, direction: t.direction,
       pnl: r2(tradePnl(t)), layers: t.layers, result: classify(t),
-      tags: t.tags||[], groups: tradeGroups(t), tagCheck: tagIssues(t.tags), parsed: parseJournal(t), notes: t.notes||''
+      tags: t.tags||[], groups: tradeGroups(t), tagCheck: tagIssues(t.tags), parsed: parseJournal(t), notes: t.notes||'',
+      screenshots: shotNames(t, 'trade')
     }))
   };
   const txt = JSON.stringify(report, null, 2);
-  const blob = new Blob([txt], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'tradetrackr-weekly-'+to+'.json';
-  a.click(); URL.revokeObjectURL(a.href);
-  const done = extra => toast('Weekly report \u00b7 '+week.length+' trade'+(week.length===1?'':'s')+extra);
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(txt).then(()=>done(' \u00b7 copied + saved'), ()=>done(' saved'));
-  } else done(' saved');
+  const counts = week.length+' trade'+(week.length===1?'':'s')+(weekLogs.length ? ' · '+weekLogs.length+' log'+(weekLogs.length===1?'':'s') : '');
+  /* copy straight away: some browsers only allow it right after the tap */
+  const copied = (navigator.clipboard && navigator.clipboard.writeText) ? navigator.clipboard.writeText(txt).then(()=>true, ()=>false) : Promise.resolve(false);
+  const fileBase = 'tradetrackr-weekly-'+to;
+  const download = (blob, name) => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 4000); };
+  if(!shots.length){
+    download(new Blob([txt], {type:'application/json'}), fileBase+'.json');
+    toast('Weekly report \u00b7 '+counts+((await copied) ? ' \u00b7 copied + saved' : ' saved'));
+    return;
+  }
+  toast('Preparing weekly report\u2026');
+  const enc = new TextEncoder(), files = [], missing = [];
+  for(const sh of shots){
+    let rec = null; try{ rec = await imgGet(sh.id); }catch(e){}
+    if(!rec) rec = await imgDownload(sh.id);
+    if(rec && rec.buf) files.push({ name: sh.name, data: new Uint8Array(rec.buf) }); else missing.push(sh.name);
+  }
+  if(missing.length) report.screenshotsNotIncluded = missing;
+  files.unshift({ name: fileBase+'.json', data: enc.encode(JSON.stringify(report, null, 2)) });
+  download(makeZip(files), fileBase+'.zip');
+  const n = files.length-1;
+  toast('Weekly report \u00b7 '+counts+' \u00b7 '+n+' screenshot'+(n===1?'':'s')+(missing.length ? ' ('+missing.length+' not on this device)' : '')+((await copied) ? ' \u00b7 JSON copied' : ''));
+}
+
+/* Minimal .zip writer: files stored as-is (screenshots are already JPEG-compressed) */
+const CRC_T = (()=>{ const t = new Uint32Array(256); for(let n=0;n<256;n++){ let c = n; for(let k=0;k<8;k++) c = c&1 ? 0xEDB88320^(c>>>1) : c>>>1; t[n] = c>>>0; } return t; })();
+function crc32(u8){ let c = 0xFFFFFFFF; for(let i=0;i<u8.length;i++) c = CRC_T[(c^u8[i])&0xFF]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+function makeZip(files){
+  const enc = new TextEncoder(), parts = [], central = [];
+  const d = new Date(Date.now()+SGT_MS); /* file times in SGT */
+  const dosT = (d.getUTCHours()<<11)|(d.getUTCMinutes()<<5)|(d.getUTCSeconds()>>1);
+  const dosD = ((d.getUTCFullYear()-1980)<<9)|((d.getUTCMonth()+1)<<5)|d.getUTCDate();
+  let off = 0;
+  for(const f of files){
+    const nm = enc.encode(f.name), crc = crc32(f.data), sz = f.data.length;
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0,0x04034b50,true); h.setUint16(4,20,true); h.setUint16(6,0x0800,true); h.setUint16(8,0,true);
+    h.setUint16(10,dosT,true); h.setUint16(12,dosD,true); h.setUint32(14,crc,true); h.setUint32(18,sz,true); h.setUint32(22,sz,true);
+    h.setUint16(26,nm.length,true); h.setUint16(28,0,true);
+    parts.push(h.buffer, nm, f.data);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0,0x02014b50,true); c.setUint16(4,20,true); c.setUint16(6,20,true); c.setUint16(8,0x0800,true); c.setUint16(10,0,true);
+    c.setUint16(12,dosT,true); c.setUint16(14,dosD,true); c.setUint32(16,crc,true); c.setUint32(20,sz,true); c.setUint32(24,sz,true);
+    c.setUint16(28,nm.length,true); c.setUint32(42,off,true);
+    central.push(c.buffer, nm);
+    off += 30 + nm.length + sz;
+  }
+  const cSize = central.reduce((s,b)=> s + b.byteLength, 0);
+  const e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0,0x06054b50,true); e.setUint16(8,files.length,true); e.setUint16(10,files.length,true); e.setUint32(12,cSize,true); e.setUint32(16,off,true);
+  return new Blob([...parts, ...central, e.buffer], {type:'application/zip'});
 }
 
 function exportCSV(){
   if(!S.trades.length) return toast('No trades to export yet');
-  const cols = ['Date','Account','Asset','Direction','PnL','Result','Tags','Notes'];
+  const cols = ['Date','Time (SGT)','Account','Asset','Direction','PnL','Result','Tags','Notes'];
   const csvEsc = v => {
     const s = String(v ?? '');
     return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
@@ -2489,11 +2565,11 @@ function exportCSV(){
     return csvEsc(s);
   };
   const rows = [...S.trades]
-    .sort((a,b)=> a.date===b.date ? a.createdAt-b.createdAt : (a.date<b.date?-1:1))
+    .sort((a,b)=> a.date===b.date ? whenTs(a)-whenTs(b) : (a.date<b.date?-1:1))
     .map(t=>{
       const p = tradePnl(t); const a = acct(t.accountId);
       const kind = classify(t);
-      return [csvEsc(t.date), csvText(a?a.name:'Deleted account'), csvText(t.asset), csvEsc(t.direction.toUpperCase()), csvEsc(p.toFixed(2)), csvEsc(kind.toUpperCase()), csvText((t.tags||[]).join('; ')), csvText(t.notes||'')].join(',');
+      return [csvEsc(t.date), csvEsc(validTime(t.time)?t.time:''), csvText(a?a.name:'Deleted account'), csvText(t.asset), csvEsc(t.direction.toUpperCase()), csvEsc(p.toFixed(2)), csvEsc(kind.toUpperCase()), csvText((t.tags||[]).join('; ')), csvText(t.notes||'')].join(',');
     });
   const csv = '\ufeff' + [cols.join(','), ...rows].join('\r\n');
   const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
@@ -2688,7 +2764,7 @@ async function connectSync(passcode){
     return;
   }
   /* both sides have a journal: ask */
-  const cnt = d => `${d.trades.length} trade${d.trades.length===1?'':'s'}, ${d.missed.length} missed, ${d.accounts.length} account${d.accounts.length===1?'':'s'}`;
+  const cnt = d => `${d.trades.length} trade${d.trades.length===1?'':'s'}, ${d.missed.length} log${d.missed.length===1?'':'s'}, ${d.accounts.length} account${d.accounts.length===1?'':'s'}`;
   openSheet(`
     <h3>Which journal should we keep?</h3>
     <p class="desc"><b>Cloud:</b> ${cnt(cloud)}<br><b>This device:</b> ${cnt(S)}</p>
