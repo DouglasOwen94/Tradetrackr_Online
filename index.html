@@ -316,6 +316,9 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:40;display:flex;justify-conte
 .sheet .field{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);margin-bottom:12px}
 .sheet .seg{margin-bottom:12px}
 .sheet .seg button{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)}
+.sheet .seg button.on{border-color:var(--gold-2);color:var(--gold-1);background:rgba(224,184,90,.12)}
+.range-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.range-row label{display:block;font-size:.72rem;font-weight:700;color:var(--ink-dim);margin:0 0 6px 2px}
 .grab{position:sticky;top:0;z-index:3;margin:0 -20px 6px;padding:10px 0 14px;background:#241e12;touch-action:none;cursor:grab}
 .grab::before{content:"";display:block;width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,.22);margin:0 auto}
 
@@ -1978,7 +1981,7 @@ function renderSettings(){
     save(); toast('Breakeven threshold: ±' + money(S.settings.beThreshold));
   });
   el.querySelector('#s-export').onclick = exportData;
-  el.querySelector('#s-export-week').onclick = exportWeekly;
+  el.querySelector('#s-export-week').onclick = openWeeklySheet;
   el.querySelector('#s-export-csv').onclick = exportCSV;
   el.querySelector('#s-import').onclick = ()=> document.getElementById('import-file').click();
   el.querySelector('#s-reset').onclick = ()=> confirmSheet(SM.key ? 'Erase this device?' : 'Erase all data?', SM.key ? 'Every account, trade and screenshot will be removed from this device and sync will be turned off here. The cloud copy is not touched.' : 'Every account, trade, note and screenshot will be permanently deleted from this device.',()=>{
@@ -2355,9 +2358,53 @@ function parseJournal(t){
   };
 }
 
-function weekStartISO(){
-  const d = new Date(); d.setDate(d.getDate()-6);
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+/* Weeks run Monday to Sunday, using the same local dates that trades are saved with */
+const isoOf = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+function weekRange(offset){
+  const d = new Date(); d.setHours(12,0,0,0);
+  d.setDate(d.getDate() - ((d.getDay()+6)%7) + 7*(offset||0)); /* back to Monday */
+  const mon = isoOf(d); d.setDate(d.getDate()+6);
+  return { from: mon, to: isoOf(d) };
+}
+const shortDate = iso => { const [y,m,d] = iso.split('-').map(Number); return d+' '+MONTHS_S[m-1]+(y!==new Date().getFullYear()?' '+y:''); };
+function openWeeklySheet(){
+  if(!S.trades.length && !S.missed.length) return toast('Nothing to report yet');
+  const today = todayISO();
+  const presets = { this: weekRange(0), last: weekRange(-1) };
+  presets.this.to = today; /* this week so far */
+  openSheet(`
+    <h3>Weekly report</h3>
+    <p class="desc">Pick the week to export. Weeks run Monday to Sunday.</p>
+    <div class="seg" id="wk-presets">
+      <button type="button" data-k="this">This week</button>
+      <button type="button" data-k="last">Last week</button>
+    </div>
+    <div class="range-row">
+      <div><label for="wk-from">From</label><div class="field">${I.cal}<input id="wk-from" type="date" max="${today}"></div></div>
+      <div><label for="wk-to">To</label><div class="field">${I.cal}<input id="wk-to" type="date" max="${today}"></div></div>
+    </div>
+    <p class="desc" id="wk-count" style="margin:2px 0 12px"></p>
+    <button class="btn-primary" id="wk-go">${I.note}Export report</button>
+  `);
+  const fromEl = document.getElementById('wk-from'), toEl = document.getElementById('wk-to');
+  const btns = [...document.querySelectorAll('#wk-presets button')];
+  const countEl = document.getElementById('wk-count');
+  const refresh = () => {
+    const f = fromEl.value, t = toEl.value;
+    btns.forEach(b=> b.classList.toggle('on', presets[b.dataset.k].from===f && presets[b.dataset.k].to===t));
+    if(!f || !t || f>t){ countEl.textContent = 'Choose a start date on or before the end date.'; return; }
+    const n = S.trades.filter(x=> x.date>=f && x.date<=t).length, l = S.missed.filter(x=> x.date>=f && x.date<=t).length;
+    countEl.textContent = shortDate(f)+' \u2013 '+shortDate(t)+' \u00b7 '+n+' trade'+(n===1?'':'s')+(l ? ' \u00b7 '+l+' log'+(l===1?'':'s') : '');
+  };
+  const pick = k => { fromEl.value = presets[k].from; toEl.value = presets[k].to; refresh(); };
+  btns.forEach(b=> b.onclick = ()=> pick(b.dataset.k));
+  fromEl.onchange = toEl.onchange = refresh;
+  pick('this');
+  document.getElementById('wk-go').onclick = ()=>{
+    const f = fromEl.value, t = toEl.value;
+    if(!f || !t || f>t) return toast('Check the dates');
+    closeSheet(()=> exportWeekly(f, t));
+  };
 }
 function statBlock(list){
   const r2 = n => Math.round(n*100)/100;
@@ -2441,10 +2488,10 @@ function groupedBlocks(list){
     confirmationStyle: by('confirmationStyle'), refined: by('refined'), refinement: by('refine')
   };
 }
-async function exportWeekly(){
+async function exportWeekly(from, to){
   if(!S.trades.length && !S.missed.length) return toast('Nothing to report yet');
   const r2 = n => Math.round(n*100)/100;
-  const from = weekStartISO(), to = todayISO();
+  if(!from || !to){ const w = weekRange(0); from = w.from; to = todayISO(); }
   const byWhen = (a,b)=> a.date===b.date ? whenTs(a)-whenTs(b) : (a.date<b.date?-1:1);
   const week = S.trades.filter(t=> t.date>=from && t.date<=to).sort(byWhen);
   const weekLogs = S.missed.filter(t=> t.date>=from && t.date<=to).sort(byWhen);
@@ -2501,7 +2548,7 @@ async function exportWeekly(){
   const counts = week.length+' trade'+(week.length===1?'':'s')+(weekLogs.length ? ' · '+weekLogs.length+' log'+(weekLogs.length===1?'':'s') : '');
   /* copy straight away: some browsers only allow it right after the tap */
   const copied = (navigator.clipboard && navigator.clipboard.writeText) ? navigator.clipboard.writeText(txt).then(()=>true, ()=>false) : Promise.resolve(false);
-  const fileBase = 'tradetrackr-weekly-'+to;
+  const fileBase = 'tradetrackr-weekly-'+from+'_to_'+to;
   const download = (blob, name) => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 4000); };
   if(!shots.length){
     download(new Blob([txt], {type:'application/json'}), fileBase+'.json');
