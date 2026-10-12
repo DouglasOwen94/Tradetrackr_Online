@@ -2384,7 +2384,8 @@ function openWeeklySheet(){
       <div><label for="wk-to">To</label><div class="field">${I.cal}<input id="wk-to" type="date" max="${today}"></div></div>
     </div>
     <p class="desc" id="wk-count" style="margin:2px 0 12px"></p>
-    <button class="btn-primary" id="wk-go">${I.note}Export report</button>
+    <div class="seg" style="grid-template-columns:1fr"><button type="button" id="wk-shots" aria-pressed="false">Include screenshots: Off</button></div>
+    <button class="btn-primary" id="wk-go" style="margin-top:10px">${I.note}Export report</button>
   `);
   const fromEl = document.getElementById('wk-from'), toEl = document.getElementById('wk-to');
   const btns = [...document.querySelectorAll('#wk-presets button')];
@@ -2400,10 +2401,13 @@ function openWeeklySheet(){
   btns.forEach(b=> b.onclick = ()=> pick(b.dataset.k));
   fromEl.onchange = toEl.onchange = refresh;
   pick('this');
+  const shotsBtn = document.getElementById('wk-shots'); let withShots = false;
+  shotsBtn.onclick = ()=>{ withShots = !withShots; shotsBtn.classList.toggle('on', withShots);
+    shotsBtn.setAttribute('aria-pressed', withShots); shotsBtn.textContent = 'Include screenshots: '+(withShots?'On':'Off'); };
   document.getElementById('wk-go').onclick = ()=>{
     const f = fromEl.value, t = toEl.value;
     if(!f || !t || f>t) return toast('Check the dates');
-    closeSheet(()=> exportWeekly(f, t));
+    closeSheet(()=> exportWeekly(f, t, withShots));
   };
 }
 function statBlock(list){
@@ -2488,7 +2492,7 @@ function groupedBlocks(list){
     confirmationStyle: by('confirmationStyle'), refined: by('refined'), refinement: by('refine')
   };
 }
-async function exportWeekly(from, to){
+async function exportWeekly(from, to, withShots){
   if(!S.trades.length && !S.missed.length) return toast('Nothing to report yet');
   const r2 = n => Math.round(n*100)/100;
   if(!from || !to){ const w = weekRange(0); from = w.from; to = todayISO(); }
@@ -2497,7 +2501,7 @@ async function exportWeekly(from, to){
   const weekLogs = S.missed.filter(t=> t.date>=from && t.date<=to).sort(byWhen);
   /* screenshots go in the zip, named date_time_kind_asset_direction_n so they sort in order */
   const shots = [], used = new Set();
-  const shotNames = (t, kind) => (t.images||[]).map((id, i)=>{
+  const shotNames = (t, kind) => !withShots ? undefined : (t.images||[]).map((id, i)=>{
     const base = 'screenshots/' + [t.date, validTime(t.time) ? t.time.replace(':','') : 'notime', kind,
       String(t.asset||'').replace(/[^A-Za-z0-9]+/g,'') || 'asset', t.direction, i+1].join('_');
     let name = base + '.jpg', k = 2;
