@@ -342,6 +342,23 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:40;display:flex;justify-conte
 .kind-seg button.on{background:linear-gradient(150deg,var(--gold-1),var(--gold-2));color:#1c1506}
 .kind-seg button.on.missed{background:rgba(224,184,90,.14);color:var(--gold-1);box-shadow:inset 0 0 0 1px rgba(224,184,90,.5)}
 .missed-note{font-size:.76rem;color:var(--ink-faint);line-height:1.5;margin:10px 2px 0}
+/* Coach notes (from the Saturday review) */
+.coach-card{padding:16px 16px 14px}
+.coach-k{font-size:.66rem;font-weight:800;color:var(--gold-1);text-transform:uppercase;letter-spacing:.08em;margin:12px 0 5px}
+.coach-verdict{font-size:.84rem;font-weight:700;line-height:1.4;color:var(--ink)}
+.coach-focus{background:rgba(240,207,124,.08);border:1px solid rgba(240,207,124,.28);border-radius:10px;padding:2px 12px 10px;margin-top:10px}
+.coach-focus .coach-k{margin-top:8px}
+.coach-focus-t{font-size:.9rem;font-weight:700;color:var(--ink);line-height:1.4}
+.coach-focus-m{font-size:.74rem;color:var(--ink-dim);margin-top:4px;line-height:1.4}
+.coach-list{margin:0;padding-left:20px;font-size:.82rem;line-height:1.5;color:var(--ink)}
+.coach-list li{margin:3px 0;overflow-wrap:anywhere}
+.coach-link{display:inline-block;margin-top:12px;font-size:.8rem;font-weight:700;color:var(--gold-1);text-decoration:none}
+.coach-more{width:100%;margin-top:12px;padding:10px;color:var(--ink)}
+.coach-sheet-item{padding:0 2px 4px}
+.coach-details{margin-top:10px}
+.coach-details summary{cursor:pointer;font-size:.78rem;font-weight:700;color:var(--gold-1);padding:6px 0;list-style-position:inside}
+.coach-strip{display:flex;align-items:center;gap:10px;width:100%;text-align:left;margin:12px 0 0;padding:10px 12px;border-radius:10px;background:rgba(240,207,124,.10);border:1px solid rgba(240,207,124,.35);color:var(--ink-dark);font-size:.82rem;font-weight:600;line-height:1.35}
+.coach-strip span:last-child{flex:1;min-width:0;overflow-wrap:anywhere}
 .optional{text-transform:none;font-weight:500;color:var(--ink-faint);letter-spacing:0}
 .calc.missed{border-style:dashed}
 
@@ -634,6 +651,8 @@ function normalize(d){
   if(!Array.isArray(d.trades)) d.trades = [];
   if(!Array.isArray(d.missed)) d.missed = [];
   if(!Array.isArray(d.txns)) d.txns = [];
+  /* Coach notes: written by the weekly review into the cloud copy, read-only in the app */
+  if(!Array.isArray(d.briefs)) d.briefs = [];
   if(fillTagGroups(d) && d.tags.some(tg=>d.tagGroups[tg]!=='other')) d.settings.tagGroupsToReview = true;
   d.trades.forEach(t=>{ if(!Array.isArray(t.tags)) t.tags = []; if(!Array.isArray(t.images)) t.images = []; });
   d.missed.forEach(t=>{ t.missed = true; if(!Array.isArray(t.tags)) t.tags = []; if(!Array.isArray(t.images)) t.images = []; if(!Array.isArray(t.layers)) t.layers = []; });
@@ -856,9 +875,11 @@ function renderCalendar(){
   }
   const legend = missedMonth ? `<div class="cal-legend"><span><i style="border:1px dashed var(--gold-1)"></i>${wide?'':'<i style="width:7px;height:7px;border-radius:50%;background:var(--gold-1)"></i>'}Log (not counted)</span></div>` : '';
   const hint = (monthN||missedMonth) ? `<p style="font-size:.72rem;color:var(--ink-dark-dim);margin:10px 4px 0;text-align:center">${wide?'Click':'Tap'} a day to review it.</p>` : '';
+  const coach = coachCardHTML(!wide);
   el.innerHTML = head + (wide
-    ? `<div class="cal-layout"><div>${monthRow}<div class="cal-grid">${cells}</div>${legend}${hint}</div><div class="cal-side">${summary}${extra}</div></div>`
-    : monthRow + summary + `<div class="cal-grid">${cells}</div>` + legend + hint);
+    ? `<div class="cal-layout"><div>${monthRow}<div class="cal-grid">${cells}</div>${legend}${hint}</div><div class="cal-side">${coach}${summary}${extra}</div></div>`
+    : coach + monthRow + summary + `<div class="cal-grid">${cells}</div>` + legend + hint);
+  const cm = el.querySelector('#coach-more'); if(cm) cm.onclick = openBriefsSheet;
 
   const calSel = el.querySelector('#cal-acct');
   if(calSel) calSel.onchange = e => { UI.statsAccountId = e.target.value; renderCalendar(); };
@@ -889,6 +910,65 @@ function openDaySheet(iso, opts){
     UI.editBack = true;
     leaveSheetFor('add', ()=>{ if(![...S.trades, ...S.missed].some(x=>x.accountId===UI.statsAccountId && x.date===iso)) return false; openDaySheet(iso, {noPush:true}); sheetEl.scrollTop = listScroll; return true; });
   });
+}
+
+/* ============================================================
+   COACH NOTES — written by the Saturday review into S.briefs
+   { weekEnding, review, createdAt, verdict, focus:{text,metric,target,status},
+     actions:[], watch:[], questions:[], reportUrl }
+   ============================================================ */
+const briefList = () => (Array.isArray(S.briefs) ? S.briefs : [])
+  .filter(b=> b && typeof b==='object' && b.weekEnding)
+  .sort((a,b)=> a.weekEnding<b.weekEnding ? 1 : a.weekEnding>b.weekEnding ? -1 : 0);
+const latestBrief = () => briefList()[0] || null;
+const strArr = a => (Array.isArray(a) ? a : []).filter(x=> typeof x==='string' && x.trim());
+const safeUrl = u => (typeof u==='string' && /^https:\/\//i.test(u)) ? u : null;
+function briefBodyHTML(b, compact){
+  const f = b.focus && typeof b.focus==='object' ? b.focus : null;
+  const acts = strArr(b.actions), watch = strArr(b.watch), qs = strArr(b.questions);
+  const url = safeUrl(b.reportUrl);
+  const li = (arr, ordered) => `<${ordered?'ol':'ul'} class="coach-list">${arr.map(x=>`<li>${esc(x)}</li>`).join('')}</${ordered?'ol':'ul'}>`;
+  return `
+    ${b.verdict ? `<div class="coach-verdict">${esc(b.verdict)}</div>` : ''}
+    ${f && f.text ? `<div class="coach-focus">
+      <div class="coach-k">One focus</div>
+      <div class="coach-focus-t">${esc(f.text)}</div>
+      ${(f.metric||f.target||f.status) ? `<div class="coach-focus-m">${[f.metric&&f.target ? esc(f.metric)+' → '+esc(f.target) : esc(f.metric||f.target||''), f.status?esc(f.status):''].filter(Boolean).join(' · ')}</div>` : ''}
+    </div>` : ''}
+    ${acts.length ? `<div class="coach-k">This week</div>${li(acts, true)}` : ''}
+    ${(()=>{
+      const rest = `${watch.length ? `<div class="coach-k">Watch for</div>${li(watch, false)}` : ''}
+        ${qs.length ? `<div class="coach-k">Questions for you</div>${li(qs, false)}` : ''}
+        ${url ? `<a class="coach-link" href="${esc(url)}" target="_blank" rel="noopener">Open the full review ↗</a>` : ''}`;
+      if(!compact || !(watch.length || qs.length || url)) return rest;
+      const n = watch.length + qs.length;
+      return `<details class="coach-details"><summary>More${n ? ' · '+n+' to watch'+(qs.length?' & answer':'') : ''}</summary>${rest}</details>`;
+    })()}`;
+}
+function coachCardHTML(compact){
+  const b = latestBrief(); if(!b) return '';
+  const n = briefList().length;
+  return `<div class="card-navy coach-card" id="coach-card">
+    <div class="card-title" style="margin-bottom:10px"><h3 style="font-size:1rem">Coach notes</h3>
+      <span class="badge">W/E ${esc(shortDate(b.weekEnding))}${b.review?' · R'+esc(String(b.review)):''}</span></div>
+    ${briefBodyHTML(b, compact)}
+    ${n>1 ? `<button class="btn-soft coach-more" id="coach-more">Earlier notes (${n-1})</button>` : ''}
+  </div>`;
+}
+function openBriefsSheet(){
+  const list = briefList(); if(!list.length) return;
+  openSheet(`
+    <h3>Coach notes</h3>
+    <p class="desc">From each Saturday review, newest first.</p>
+    ${list.map(b=>`<div class="sub-head"><span>Week ending ${esc(shortDate(b.weekEnding))}</span><span style="color:var(--ink-faint)">${b.review?'Review '+esc(String(b.review)):''}</span></div>
+      <div class="coach-sheet-item">${briefBodyHTML(b)}</div>`).join('')}
+  `);
+}
+/* One-line reminder on the Add screen */
+function focusStripHTML(){
+  const b = latestBrief();
+  const t = b && b.focus && typeof b.focus.text==='string' ? b.focus.text.trim() : '';
+  return t ? `<button class="coach-strip" id="coach-strip" aria-label="Open coach notes"><span class="coach-k" style="margin:0">Focus</span><span>${esc(t)}</span></button>` : '';
 }
 
 /* ============================================================
@@ -1537,6 +1617,7 @@ function renderAdd(){
   el.innerHTML = `
   <h2 style="font-size:1.3rem;margin:4px 2px 6px">${editing ? (missed?'Edit log':'Edit trade') : 'New entry'}</h2>
   <p style="font-size:.82rem;color:var(--ink-dark-dim);margin:0 2px">${editing?'Update the details below.':'Log it while the details are fresh.'}</p>
+  ${editing ? '' : focusStripHTML()}
 
   <div class="kind-seg" role="group" aria-label="Entry type">
     <button data-kind="taken" class="${!missed?'on':''}" aria-pressed="${!missed}">${I.check}Taken</button>
@@ -1611,6 +1692,7 @@ function renderAdd(){
   const fs = el.querySelector('#f-assets'); if(fs) fs.onclick = e => { const b=e.target.closest('[data-sym]'); if(b){ f.asset=b.dataset.sym; renderAdd(); } };
   el.querySelectorAll('[data-dir]').forEach(b=> b.onclick = ()=>{ f.direction=b.dataset.dir; renderAdd(); });
   el.querySelectorAll('[data-kind]').forEach(b=> b.onclick = ()=>{ if(f.kind!==b.dataset.kind){ f.kind = b.dataset.kind; rerenderForm(f); } });
+  const cstrip = el.querySelector('#coach-strip'); if(cstrip) cstrip.onclick = openBriefsSheet;
   const fr = el.querySelector('#f-reason'); if(fr) fr.onclick = e => { const b=e.target.closest('[data-reason]'); if(b){ f.reason = f.reason===b.dataset.reason ? null : b.dataset.reason; rerenderForm(f); } };
   el.querySelector('#f-shots').onclick = e => {
     const rm = e.target.closest('[data-rm-img]');
@@ -2269,6 +2351,8 @@ document.getElementById('import-file').addEventListener('change', e=>{
       if(!d) throw 0;
       confirmSheet('Restore this backup?', SM.key ? 'This replaces everything on this device with the backup file, and then replaces the cloud copy too.' : 'This replaces everything currently on this device with the backup file.', async ()=>{
         if(!d.settings) d.settings = {defaultAccountId:d.accounts?.[0]?.id||null, defaultAsset:'XAUUSD', beThreshold:0};
+        /* keep current coach notes if the backup is older than them */
+        if(!(Array.isArray(d.briefs) && d.briefs.length) && S.briefs && S.briefs.length) d.briefs = S.briefs;
         S = normalize(JSON.parse(JSON.stringify(d)));
         const imgs = j.images && typeof j.images==='object' ? j.images : {};
         for(const [id, im] of Object.entries(imgs)){
@@ -2715,6 +2799,8 @@ function mergeStates(remote, local, baseIdsArr){
   out.tags = union(out.tags, local.tags);
   out.tagGroups = Object.assign({}, out.tagGroups||{}, local.tagGroups||{});
   out.settings = Object.assign({}, out.settings||{}, local.settings||{});
+  /* Coach notes come from the cloud, so the cloud copy wins */
+  out.briefs = (remote.briefs && remote.briefs.length) ? remote.briefs : (local.briefs||[]);
   if(out.settings.defaultAccountId && !out.accounts.some(a=>a.id===out.settings.defaultAccountId)) out.settings.defaultAccountId = out.accounts[0]?.id || null;
   return normalize(out);
 }
