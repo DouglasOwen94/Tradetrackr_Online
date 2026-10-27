@@ -619,7 +619,16 @@ function fillTagGroups(d){
 }
 /* Skeleton inserted into the notes box. Plan, Result and After are parsed for the weekly report; the rest is free text.
    Old short headers (P, E, Post) are still read so earlier trades keep working. */
-const NOTE_TEMPLATE = 'Plan: \nAlign: \nBefore: \nDuring: \nResult: Best+  Worst-  out  BE@\nAfter: \nLesson: \n';
+const NOTE_TEMPLATE = 'Plan: \nAlign: \nBefore: \nDoubt: \nDuring: \nResult: Best+  Worst-  out  BE@\nAfter: \nLesson: \n';
+/* Your own template (Settings → Journal template) wins; it syncs with your other settings */
+function noteTemplate(){
+  const t = S && S.settings && typeof S.settings.noteTemplate==='string' ? S.settings.noteTemplate : '';
+  if(!t.trim()) return NOTE_TEMPLATE;
+  return t.endsWith('\n') ? t : t + '\n';
+}
+/* Lines the weekly report reads: warn if a custom template drops them */
+const TEMPLATE_KEY_LINES = [['Plan','entry, SL and TP'], ['Result','Best, Worst, exit and BE@'], ['After','what price did after an early exit']];
+const templateMissing = t => TEMPLATE_KEY_LINES.filter(([k])=> !new RegExp('^\\s*'+k+'\\s*:', 'im').test(t));
 /* Price move per pip, used to turn entry/exit prices into pips and R. XAUUSD: 1 pip = 0.10 */
 const PIP_SIZE = { XAUUSD: 0.1 };
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1741,8 +1750,9 @@ function renderAdd(){
   el.querySelector('#f-date').onchange = e=>{ f.date = e.target.value || todaySGT(); f.whenTouched = true; };
   el.querySelector('#f-time').onchange = e=>{ f.time = e.target.value || ''; f.whenTouched = true; };
   el.querySelector('#f-tpl').onclick = ()=>{
-    if(!f.notes.trim()) f.notes = NOTE_TEMPLATE;
-    else if(!/^\s*(P|Plan)\s*:/im.test(f.notes)) f.notes = NOTE_TEMPLATE + '\n' + f.notes;
+    const tpl = noteTemplate();
+    if(!f.notes.trim()) f.notes = tpl;
+    else if(!/^\s*(P|Plan)\s*:/im.test(f.notes)) f.notes = tpl + '\n' + f.notes;
     renderAdd();
     setTimeout(()=>{ const t = document.getElementById('f-notes'); if(t){ t.focus(); t.setSelectionRange(6,6); } }, 40);
   };
@@ -1976,6 +1986,19 @@ function renderSettings(){
   </div>
 
   <div class="card-glass">
+    <div class="card-title"><h3>Journal template</h3>${(typeof S.settings.noteTemplate==='string' && S.settings.noteTemplate.trim()) ? '<span class="badge">CUSTOM</span>' : ''}</div>
+    <p style="font-size:.78rem;color:var(--ink-dark-dim);margin-bottom:10px">What the Template button puts in your notes. One line per heading. Keep <b>Plan</b>, <b>Result</b> and <b>After</b>: the weekly report reads them.</p>
+    <div class="field" style="background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);align-items:flex-start">
+      <textarea id="s-tpl" rows="9" spellcheck="false" aria-label="Journal template" style="min-height:190px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.82rem">${esc(noteTemplate())}</textarea>
+    </div>
+    <p id="s-tpl-warn" style="font-size:.76rem;color:var(--gold-1);margin:8px 2px 0;line-height:1.45" hidden></p>
+    <div class="row-btns" style="margin-top:10px">
+      <button class="btn-soft" id="s-tpl-reset">Reset to default</button>
+      <button class="btn-soft" id="s-tpl-save" style="background:linear-gradient(150deg,var(--gold-1),var(--gold-2));color:#1c1506">Save template</button>
+    </div>
+  </div>
+
+  <div class="card-glass">
     <div class="card-title"><h3>Data</h3></div>
     <p style="font-size:.78rem;color:var(--ink-dark-dim);margin-bottom:8px">${SM.key ? 'Your journal is saved on this device and synced to the cloud. A backup file is an extra copy you keep yourself.' : 'Your journal lives on this device. Export a backup regularly, or turn on Sync above.'} Backups include your screenshots.</p>
     ${(()=>{
@@ -2062,6 +2085,21 @@ function renderSettings(){
     S.settings.beThreshold = parseFloat(e.target.value)||0;
     save(); toast('Breakeven threshold: ±' + money(S.settings.beThreshold));
   });
+  const tplIn = el.querySelector('#s-tpl'), tplWarn = el.querySelector('#s-tpl-warn');
+  const tplCheck = () => {
+    const miss = templateMissing(tplIn.value);
+    tplWarn.hidden = !miss.length || !tplIn.value.trim();
+    if(miss.length) tplWarn.textContent = 'Missing: ' + miss.map(([k,w])=> k+' ('+w+')').join(', ') + '. The weekly report can’t read these trades without them.';
+  };
+  tplIn.addEventListener('input', tplCheck); tplCheck();
+  el.querySelector('#s-tpl-save').onclick = ()=>{
+    const v = tplIn.value.replace(/\r\n?/g,'\n').replace(/\n+$/,'');
+    /* saving the default (or blank) clears the custom one, so future default updates still reach you */
+    if(!v.trim() || v + '\n' === NOTE_TEMPLATE){ S.settings.noteTemplate = ''; save(); renderSettings(); return toast('Using the default template'); }
+    S.settings.noteTemplate = v + '\n'; save(); renderSettings();
+    toast(templateMissing(v).length ? 'Template saved · check the warning' : 'Template saved');
+  };
+  el.querySelector('#s-tpl-reset').onclick = ()=>{ S.settings.noteTemplate = ''; save(); renderSettings(); toast('Template reset to default'); };
   el.querySelector('#s-export').onclick = exportData;
   el.querySelector('#s-export-week').onclick = openWeeklySheet;
   el.querySelector('#s-export-csv').onclick = exportCSV;
@@ -2287,18 +2325,21 @@ function openLegendSheet(){
     <p class="desc">Write Plan before you click. Fill the rest as the trade plays out.</p>
     <pre style="background:rgba(255,255,255,.06);border-radius:10px;padding:12px;font-size:.76rem;line-height:1.6;white-space:pre-wrap;word-break:break-word;margin-bottom:14px">Plan: 4289 SL30 TP60
 Align: 4L
-Before: 4H engulf + 15m engulf, bought the retrace
+Before: DOC tap, 4L lines up, DXY at resistance
+Doubt: no
 During: ranging, 5m bottom wicks, DXY at resistance
 Result: Best+27 Worst-20 out4289 BE@20
 After: SL, kept dropping after BE hit
 Lesson: </pre>
     ${row('Plan','Entry price, stop in pips, target in pips. The level goes in your tags, not here.')}
     ${row('Align','The lower-timeframe level(s) your level lines up with, e.g. 4L or DOC, DL. Write none if nothing lines up.')}
-    ${row('Before','What you saw before entering: level, confirmation, DXY, momentum, how you feel.')}
+    ${row('Before','What you saw before entering: level, entry (Tap unless you say otherwise), DXY, momentum, how you feel.')}
+    ${row('Doubt','yes or no, written before you enter. If yes, add why in a few words, e.g. yes, zone already tested.')}
     ${row('During','What price is doing and anything you change. If you move your stop somewhere other than entry, write the price here.')}
     ${row('Result','Best = furthest pips in your favour. Worst = furthest pips against. out = exit price. BE@ = how many pips in profit price was when you moved your stop to entry. Leave BE@ blank if you never moved it.')}
     ${row('After','Only if you exited before your SL or TP: after you were out, which did price reach first? Start with SL, TP or none, then add anything else.')}
     ${row('Lesson','One lesson you can check next week.')}
+    <p class="desc" style="margin-top:8px">You can change the template in Settings → Journal template. Keep the Plan, Result and After lines: the weekly report reads them.</p>
     <div class="section-label" style="margin-top:16px">Tags</div>
     ${row('Level','The level you traded from.')}
     ${row('Entry','The confirmation you entered on.')}
