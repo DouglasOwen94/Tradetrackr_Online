@@ -263,6 +263,9 @@ input::placeholder,textarea::placeholder{color:var(--ink-faint)}
 .dir-badge{font-size:.62rem;font-weight:800;padding:2px 7px;border-radius:4px;letter-spacing:.04em}
 .dir-badge.buy{background:rgba(58,217,142,.16);color:var(--green)}
 .dir-badge.sell{background:rgba(255,132,132,.16);color:var(--red)}
+.dir-badge.wk{background:rgba(224,184,90,.14);color:var(--gold-1)}
+.dir-badge.plan{background:rgba(58,217,142,.10);color:var(--green);font-weight:700}
+.dir-badge.hind{background:rgba(255,255,255,.07);color:var(--ink-faint);font-weight:700}
 .trade-row .meta{font-size:.72rem;color:var(--ink-faint);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .trade-row .note{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:.74rem;color:var(--ink-dim);margin-top:5px;line-height:1.45;white-space:normal;word-break:break-word}
 .trade-row .tagrow{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
@@ -629,6 +632,15 @@ function noteTemplate(){
 /* Lines the weekly report reads: warn if a custom template drops them */
 const TEMPLATE_KEY_LINES = [['Plan','entry, SL and TP'], ['Result','Best, Worst, exit and BE@'], ['After','what price did after an early exit']];
 const templateMissing = t => TEMPLATE_KEY_LINES.filter(([k])=> !new RegExp('^\\s*'+k+'\\s*:', 'im').test(t));
+/* Plan written before the outcome? The form notes the time you finish typing the Plan line (entry + SL)
+   and the Result line (exit price). Plan 5+ minutes before Result = Planned; same sitting = Hindsight. */
+const PLAN_GAP_MIN = 5;
+const planReady = notes => { const p = lineOf(notes,'(?:Plan|P)'); return !!(p && /SL\s*\d/i.test(p) && /\d{3,}/.test(p.replace(/(SL|TP)\s*\d+(?:\.\d+)?/ig,''))); };
+const resultReady = notes => { const e = lineOf(notes,'(?:Result|E)'); return !!(e && /\bout\s*@?\s*\d{3,}/i.test(e)); };
+function planTiming(t){
+  if(!t || !t.planAt || !t.resultAt) return 'unknown';
+  return (t.resultAt - t.planAt) >= PLAN_GAP_MIN*60000 ? 'planned' : 'hindsight';
+}
 /* Price move per pip, used to turn entry/exit prices into pips and R. XAUUSD: 1 pip = 0.10 */
 const PIP_SIZE = { XAUUSD: 0.1 };
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1365,14 +1377,49 @@ function monthlyBarsSVG(aid, y, m){
 function blankForm(){
   const d = defAcct();
   return { editingId:null, accountId: d ? d.id : null, asset: S.settings.defaultAsset || S.assets[0] || null,
-           direction:'buy', entries:[{sign:1, str:''}], tags:[], notes:'', date: todaySGT(), time: nowSGT(), kind:'taken', reason:null, images:[] };
+           direction:'buy', entries:[{sign:1, str:''}], tags:[], notes:'', date: todaySGT(), time: nowSGT(), kind:'taken', reason:null, images:[],
+           planAt:null, resultAt:null, planWas:false, resultWas:false };
 }
 function formFromTrade(t){
   const layers = t.layers||[];
   return { editingId:t.id, accountId:t.accountId, asset:t.asset, direction:t.direction,
     entries: layers.length ? layers.map(v=>({sign: v<0?-1:1, str: String(Math.abs(v))})) : [{sign:1, str:''}],
     tags:[...(t.tags||[])], notes:t.notes||'', date:t.date, time: validTime(t.time) ? t.time : '', whenTouched:true,
-    kind: t.missed ? 'missed' : 'taken', reason: t.reason||null, images:[...(t.images||[])] };
+    kind: t.missed ? 'missed' : 'taken', reason: t.reason||null, images:[...(t.images||[])],
+    planAt: t.planAt||null, resultAt: t.resultAt||null,
+    /* lines already filled before this edit can't be timed, so they are never stamped as new */
+    planWas: !t.planAt && planReady(t.notes), resultWas: !t.resultAt && resultReady(t.notes) };
+}
+/* Note the first moment each line is complete. Never re-stamped. */
+function stampTimes(f){
+  const n = Date.now();
+  if(!f.planAt && !f.planWas && planReady(f.notes)) f.planAt = n;
+  if(!f.resultAt && !f.resultWas && resultReady(f.notes)) f.resultAt = n;
+}
+/* A new entry you haven't saved yet is kept on this device, so it survives the app closing mid-trade */
+const DRAFT_KEY = 'tt_draft';
+function saveDraft(f){ if(!f || f.editingId) return; try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(f)); }catch(e){} }
+function clearDraft(){ try{ localStorage.removeItem(DRAFT_KEY); }catch(e){} }
+function loadDraft(){
+  try{
+    const d = JSON.parse(localStorage.getItem(DRAFT_KEY)||'null');
+    if(!d || typeof d!=='object' || d.editingId || !Array.isArray(d.entries) || typeof d.notes!=='string') return null;
+    if(!d.notes.trim() && !(d.tags||[]).length && !(d.images||[]).length && !d.entries.some(e=>e.str)) return null;
+    d.imgBusy = false; d.tagsConfirmed = false;
+    return d;
+  }catch(e){ return null; }
+}
+const draftHasContent = f => !!(f && !f.editingId && (f.notes.trim() || (f.tags||[]).length || (f.images||[]).length || f.entries.some(e=>e.str)));
+/* Trade number inside its Monday–Sunday week, oldest first: the same #n the weekly report uses */
+function tradeWeekNo(t){
+  const [y,m,d] = t.date.split('-').map(Number);
+  const day = new Date(Date.UTC(y,m-1,d)); const off = (day.getUTCDay()+6)%7;
+  const mon = new Date(day); mon.setUTCDate(day.getUTCDate()-off);
+  const sun = new Date(mon); sun.setUTCDate(mon.getUTCDate()+6);
+  const a = mon.toISOString().slice(0,10), b = sun.toISOString().slice(0,10);
+  const wk = S.trades.filter(x=> x.date>=a && x.date<=b)
+    .sort((p,q)=> p.date===q.date ? whenTs(p)-whenTs(q) : (p.date<q.date?-1:1));
+  return wk.indexOf(t)+1;
 }
 const calcNet = f => f.entries.reduce((s,e)=> s + (e.sign * (parseFloat(e.str)||0)), 0);
 const calcExpr = f => f.entries.map((e,i)=>{
@@ -1521,6 +1568,10 @@ function notePreview(t){
   const free = n.split('\n').map(x=>x.trim()).find(x=> x && !/^(Plan|P|Before|Pre|During|Result|E|After|Post|Lesson|L)\s*:/i.test(x));
   return free || '';
 }
+function timingBadge(t){
+  const k = planTiming(t);
+  return k==='planned' ? '<span class="dir-badge plan">✓ Planned</span>' : k==='hindsight' ? '<span class="dir-badge hind">⏱ Hindsight</span>' : '';
+}
 function tradeRowHTML(t, meta){
   const multiAsset = S.assets.length>1 || S.trades.some(x=>x.asset!==t.asset);
   let pnlHTML;
@@ -1537,7 +1588,7 @@ function tradeRowHTML(t, meta){
   return `<button class="trade-row ${t.missed?'missed':''}" data-id="${t.id}">
     ${multiAsset?`<span class="ava">${esc(t.asset.slice(0,3))}</span>`:''}
     <span class="mid">
-      <span class="sym">${multiAsset?esc(t.asset):''}<span class="dir-badge ${t.direction}">${t.direction.toUpperCase()}</span>${t.missed?'<span class="dir-badge missed">LOG</span>':''}</span>
+      <span class="sym">${t.missed?'':`<span class="dir-badge wk">#${tradeWeekNo(t)}</span>`}${multiAsset?esc(t.asset):''}<span class="dir-badge ${t.direction}">${t.direction.toUpperCase()}</span>${t.missed?'<span class="dir-badge missed">LOG</span>':''}${timingBadge(t)}</span>
       ${meta?`<span class="meta">${meta}</span>`:''}
       ${t.tags&&t.tags.length?`<span class="tagrow">${t.tags.map(tg=>`<span class="mini-tag">${esc(tg)}</span>`).join('')}</span>`:''}
       ${notePreview(t)?`<span class="note">${esc(notePreview(t))}</span>`:''}
@@ -1613,7 +1664,7 @@ function tagIssues(tags){
 function renderAdd(){
   const el = document.getElementById('view-add');
   if(!S.accounts.length){ el.innerHTML = emptyOnboard(); return; }
-  if(!UI.form) UI.form = blankForm();
+  if(!UI.form) UI.form = loadDraft() || blankForm();
   const f = UI.form;
   if(!acct(f.accountId)) f.accountId = defAcct().id;
   const net = calcNet(f);
@@ -1662,6 +1713,7 @@ function renderAdd(){
   <div class="chips" id="f-note-tools">
     <button class="select-chip ghost" id="f-tpl">${I.plus}Template</button>
     <button class="select-chip ghost" id="f-legend">${I.note}Legend</button>
+    ${draftHasContent(f) ? `<button class="select-chip ghost" id="f-clear">${I.x}Clear</button>` : ''}
   </div>
   <div class="field">${I.note}<textarea id="f-notes" placeholder="${missed?'What you saw, your plan, what price did after — tap Template to start':'Plan: 4289 SL30 TP60 — tap Template to start'}">${esc(f.notes)}</textarea></div>
 
@@ -1745,10 +1797,11 @@ function renderAdd(){
     netEl.textContent = money(n,true);
     netEl.style.color = n>0?'var(--green)':n<0?'var(--red)':'var(--ink)';
     el.querySelector('#k-expr').textContent = calcExpr(f);
+    saveDraft(f);
   };
 
-  el.querySelector('#f-date').onchange = e=>{ f.date = e.target.value || todaySGT(); f.whenTouched = true; };
-  el.querySelector('#f-time').onchange = e=>{ f.time = e.target.value || ''; f.whenTouched = true; };
+  el.querySelector('#f-date').onchange = e=>{ f.date = e.target.value || todaySGT(); f.whenTouched = true; saveDraft(f); };
+  el.querySelector('#f-time').onchange = e=>{ f.time = e.target.value || ''; f.whenTouched = true; saveDraft(f); };
   el.querySelector('#f-tpl').onclick = ()=>{
     const tpl = noteTemplate();
     if(!f.notes.trim()) f.notes = tpl;
@@ -1757,10 +1810,15 @@ function renderAdd(){
     setTimeout(()=>{ const t = document.getElementById('f-notes'); if(t){ t.focus(); t.setSelectionRange(6,6); } }, 40);
   };
   el.querySelector('#f-legend').onclick = openLegendSheet;
+  const fclr = el.querySelector('#f-clear');
+  if(fclr) fclr.onclick = ()=> confirmSheet('Clear this entry?', 'This empties the form and the unsaved copy kept on this device.', ()=>{
+    clearDraft(); UI.form = blankForm(); renderAdd(); toast('Entry cleared');
+  });
+  saveDraft(f);
 
   const ta = el.querySelector('#f-notes');
   const growTa = ()=>{ ta.style.height='auto'; ta.style.height = Math.max(84, Math.min(ta.scrollHeight, 340)) + 'px'; };
-  ta.oninput = e=>{ f.notes = e.target.value; growTa(); };
+  ta.oninput = e=>{ f.notes = e.target.value; stampTimes(f); saveDraft(f); growTa(); };
   growTa();
   el.querySelector('#f-save').onclick = saveTrade;
   const delBtn = el.querySelector('#f-delete');
@@ -1796,6 +1854,7 @@ function saveTrade(){
     accountId: f.accountId, asset: f.asset, direction: f.direction,
     layers, tags: f.tags||[], notes: f.notes.trim(), date: f.date || todaySGT(), time: validTime(f.time) ? f.time : null,
     images: [...(f.images||[])],
+    planAt: f.planAt||null, resultAt: f.resultAt||null,
     createdAt: orig ? (orig.createdAt || stamp) : stamp,
     updatedAt: stamp
   };
@@ -1808,6 +1867,7 @@ function saveTrade(){
   const dest = f.editingId ? (UI.returnTo||'history') : 'calendar';
   if(missed) toast(orig ? 'Entry updated' : 'Log saved');
   else toast(orig ? 'Trade updated' : 'Trade saved · ' + money(tradePnl(rec),true));
+  if(!f.editingId) clearDraft();
   save(); UI.form = null; UI.returnTo = null;
   leaveEdit(dest);
 }
@@ -3211,7 +3271,7 @@ function render(){
 }
 document.querySelectorAll('[data-nav]').forEach(b=> b.addEventListener('click', ()=>{
   const t = b.dataset.nav;
-  if(t==='add' && (!UI.form || UI.form.editingId)){ UI.form = blankForm(); UI.editBack = false; UI.reopen = null; }
+  if(t==='add' && (!UI.form || UI.form.editingId)){ UI.form = loadDraft() || blankForm(); UI.editBack = false; UI.reopen = null; }
   nav(t);
 }));
 
@@ -3289,6 +3349,7 @@ history.replaceState({tab:'calendar'}, '', '#calendar');
   document.getElementById('hdr-date').textContent = DOW[now.getDay()] + ' · ' + now.getDate() + ' ' + MONTHS_S[now.getMonth()] + ' ' + now.getFullYear();
 }
 nav('calendar', true);
+if(draftHasContent(loadDraft())) setTimeout(()=> toast('Unsaved entry kept · tap + to finish it'), 600);
 paintSync();
 if(SM.key) syncNow();
 setTimeout(gcImages, 8000);
