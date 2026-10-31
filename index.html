@@ -263,6 +263,8 @@ input::placeholder,textarea::placeholder{color:var(--ink-faint)}
 .dir-badge{font-size:.62rem;font-weight:800;padding:2px 7px;border-radius:4px;letter-spacing:.04em}
 .dir-badge.buy{background:rgba(58,217,142,.16);color:var(--green)}
 .dir-badge.sell{background:rgba(255,132,132,.16);color:var(--red)}
+.jcheck{margin:4px 0 14px;padding-left:18px;font-size:.84rem;line-height:1.5;color:var(--ink)}
+.jcheck li{margin-bottom:6px}
 .dir-badge.wk{background:rgba(224,184,90,.14);color:var(--gold-1)}
 .dir-badge.plan{background:rgba(58,217,142,.10);color:var(--green);font-weight:700}
 .dir-badge.hind{background:rgba(255,255,255,.07);color:var(--ink-faint);font-weight:700}
@@ -1410,6 +1412,49 @@ function loadDraft(){
   }catch(e){ return null; }
 }
 const draftHasContent = f => !!(f && !f.editingId && (f.notes.trim() || (f.tags||[]).length || (f.images||[]).length || f.entries.some(e=>e.str)));
+/* Journal checks run when you tap Save, so typos and a wrong Buy/Sell are fixed before Saturday's report.
+   Analysis logs, and logs with no Plan line, are not checked. */
+const MAX_SL = 50;
+function journalIssues(f){
+  const isLog = f.kind==='missed';
+  if(isLog && f.reason==='analysis') return [];
+  const notes = f.notes || '';
+  const hasPlan = lineOf(notes,'(?:Plan|P)')!==null, resLine = lineOf(notes,'(?:Result|E)');
+  if(isLog && !hasPlan) return [];
+  const layers = f.entries.filter(e=>e.str!=='' && !isNaN(parseFloat(e.str))).map(e=> e.sign*parseFloat(e.str));
+  const pj = parseJournal({ notes, asset:f.asset, direction:f.direction, layers });
+  const out = [];
+  const sgn = n => (n>0?'+':n<0?'−':'') + Math.abs(n);
+  if(pj.problem) out.push(pj.problem);
+  if(!hasPlan) out.push('No Plan line. Write it like: Plan: 4002.3 SL30 TP60');
+  else {
+    if(pj.entry===null) out.push('Plan has no entry price');
+    if(pj.slPips===null) out.push('Plan has no SL (in pips, e.g. SL30)');
+    if(pj.tpPips===null) out.push('Plan has no TP (in pips, e.g. TP60)');
+  }
+  if(pj.slPips!==null && pj.slPips>MAX_SL && pj.slPips<1000) out.push('SL'+pj.slPips+' is over your '+MAX_SL+'-pip max');
+  /* a log only needs a full Result once you've started writing one */
+  const resStarted = resLine!==null && /\d/.test(resLine);
+  if(!isLog || resStarted){
+    if(resLine===null) out.push('No Result line');
+    else {
+      if(pj.bestPips===null) out.push('Result has no Best (e.g. Best+40)');
+      if(pj.worstPips===null) out.push('Result has no Worst (e.g. Worst-7)');
+      if(pj.exitPrice===null && !pj.problem) out.push('Result has no exit price (e.g. out4002.3)');
+    }
+  }
+  if(pj.beAtPips!==null && pj.bestPips!==null && pj.beAtPips > pj.bestPips) out.push('BE@'+pj.beAtPips+' but Best is only +'+pj.bestPips+': price never got that far');
+  /* wrong Buy/Sell: the money and the journal disagree on which way the trade went */
+  const pnl = layers.reduce((a,b)=>a+b,0);
+  if(!pj.problem && pj.exitPips!==null && Math.abs(pj.exitPips)>=3 && layers.length && Math.abs(pnl)>=0.5 && Math.sign(pnl)!==Math.sign(pj.exitPips))
+    out.push('PnL is '+(pnl>0?'+':'−')+'$'+Math.abs(Math.round(pnl*100)/100)+' but entry '+pj.entry+' to exit '+pj.exitPrice+' as a '+(f.direction==='sell'?'Sell':'Buy')+' is '+sgn(pj.exitPips)+' pips. Check Buy/Sell and the prices');
+  if(!isLog && f.date >= '2026-10-27'){
+    const al = lineOf(notes,'Align'), db = lineOf(notes,'Doubt');
+    if(al===null || !al.trim()) out.push('Align line is empty: write the level(s) it lines up with, or none');
+    if(db===null || !db.trim()) out.push('Doubt line is empty: write yes or no');
+  }
+  return out;
+}
 /* Trade number inside its Monday–Sunday week, oldest first: the same #n the weekly report uses */
 function tradeWeekNo(t){
   const [y,m,d] = t.date.split('-').map(Number);
@@ -1625,13 +1670,18 @@ function openSetupSheet(sel, opts){
 }
 
 function tagPickerHTML(f){
+  /* Analysis logs are about the day, not one setup: no level or entry tags */
+  if(f.kind==='missed' && f.reason==='analysis') return '';
   const chip = tg => `<button class="select-chip ${f.tags.includes(tg)?'on':''}" data-tag="${esc(tg)}">${esc(tg)}</button>`;
   const hint = h => `<span style="text-transform:none;font-weight:500;color:var(--ink-faint)">· ${h}</span>`;
-  let h = TAG_GROUPS.filter(g=> S.tags.some(tg=>tagGroup(tg)===g.key)).map(g=>`
+  /* Refine is retired (system change 27 Oct): no row for it. A refine tag already on an old trade stays on it. */
+  let h = TAG_GROUPS.filter(g=> g.key!=='refine' && S.tags.some(tg=>tagGroup(tg)===g.key)).map(g=>`
   <div class="section-label">${g.label} ${hint(g.hint)}</div>
   <div class="chips tag-group" data-group="${g.key}">
     ${S.tags.filter(tg=>tagGroup(tg)===g.key).map(chip).join('')}
   </div>`).join('');
+  const oldRef = (f.tags||[]).filter(tg=>tagGroup(tg)==='refine');
+  if(oldRef.length) h += `<p class="desc" style="margin:6px 2px 0;font-size:.74rem;color:var(--ink-faint)">Old refinement tag kept on this trade: <b>${oldRef.map(esc).join(', ')}</b></p>`;
   const other = S.tags.filter(tg=>tagGroup(tg)==='other');
   if(other.length) h += `
   <div class="section-label">Other tags ${hint('any')}</div>
@@ -1811,14 +1861,14 @@ function renderAdd(){
   };
   el.querySelector('#f-legend').onclick = openLegendSheet;
   const fclr = el.querySelector('#f-clear');
-  if(fclr) fclr.onclick = ()=> confirmSheet('Clear this entry?', 'This empties the form and the unsaved copy kept on this device.', ()=>{
+  if(fclr) fclr.onclick = ()=> askSheet('Clear this entry?', 'This empties the form and the unsaved copy kept on this device.', 'Clear', ()=>{
     clearDraft(); UI.form = blankForm(); renderAdd(); toast('Entry cleared');
   });
   saveDraft(f);
 
   const ta = el.querySelector('#f-notes');
   const growTa = ()=>{ ta.style.height='auto'; ta.style.height = Math.max(84, Math.min(ta.scrollHeight, 340)) + 'px'; };
-  ta.oninput = e=>{ f.notes = e.target.value; stampTimes(f); saveDraft(f); growTa(); };
+  ta.oninput = e=>{ f.notes = e.target.value; f.journalConfirmed = false; stampTimes(f); saveDraft(f); growTa(); };
   growTa();
   el.querySelector('#f-save').onclick = saveTrade;
   const delBtn = el.querySelector('#f-delete');
@@ -1840,6 +1890,20 @@ function saveTrade(){
   const missed = f.kind==='missed';
   const layers = f.entries.filter(e=>e.str!=='' && !isNaN(parseFloat(e.str))).map(e=> e.sign*parseFloat(e.str));
   if(!missed && !layers.length) return toast('Enter the PnL on the calculator');
+  const jIssues = journalIssues(f);
+  if(jIssues.length && !f.journalConfirmed){
+    openSheet(`
+      <h3>Check your journal</h3>
+      <p class="desc">${jIssues.length===1?'This':'These'} would show up as ${jIssues.length===1?'a fix':'fixes'} in Saturday's report:</p>
+      <ul class="jcheck">${jIssues.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+      <div class="row-btns">
+        <button class="btn-soft" id="sh-no" style="background:linear-gradient(150deg,var(--gold-1),var(--gold-2));color:#1c1506">Go back and fix</button>
+        <button class="btn-soft" id="sh-yes" style="background:rgba(255,255,255,.08)">Save anyway</button>
+      </div>`);
+    document.getElementById('sh-no').onclick = ()=> closeSheet();
+    document.getElementById('sh-yes').onclick = ()=> closeSheet(()=>{ f.journalConfirmed = true; saveTrade(); });
+    return;
+  }
   const issues = missed ? [] : tagIssues(f.tags);
   if(issues.length && !f.tagsConfirmed){
     return askSheet('Save with '+issues.join(' and ')+'?',
@@ -1852,7 +1916,7 @@ function saveTrade(){
   const rec = {
     id: orig ? orig.id : uid(),
     accountId: f.accountId, asset: f.asset, direction: f.direction,
-    layers, tags: f.tags||[], notes: f.notes.trim(), date: f.date || todaySGT(), time: validTime(f.time) ? f.time : null,
+    layers, tags: (missed && f.reason==='analysis') ? [] : (f.tags||[]), notes: f.notes.trim(), date: f.date || todaySGT(), time: validTime(f.time) ? f.time : null,
     images: [...(f.images||[])],
     planAt: f.planAt||null, resultAt: f.resultAt||null,
     createdAt: orig ? (orig.createdAt || stamp) : stamp,
@@ -2403,7 +2467,6 @@ Lesson: </pre>
     <div class="section-label" style="margin-top:16px">Tags</div>
     ${row('Level','The level you traded from.')}
     ${row('Entry','The confirmation you entered on.')}
-    ${row('Refine','Optional. The timeframe you refined the level on.')}
     <p class="desc" style="margin-top:6px">One tag per group. Sort your tags into groups in Settings.</p>
     <button class="btn-primary" id="sh-ok" style="margin-top:8px">${I.check}Got it</button>
   `);
