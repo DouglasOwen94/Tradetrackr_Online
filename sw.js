@@ -1,4 +1,4 @@
-const CACHE = 'tradetrackr-online-v8';
+const CACHE = 'tradetrackr-online-v9';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './lightweight-charts.standalone.production.js'];
 
 self.addEventListener('install', e => {

@@ -1909,8 +1909,11 @@ function applyTemplate(notes, tpl){
    ============================================================ */
 const LWC_SRC = 'lightweight-charts.standalone.production.js';
 const SGT_S = 8*3600;
-const TFS = [['1m','1min',60],['3m','1min',180],['5m','5min',300],['15m','15min',900],['30m','30min',1800],
-             ['1H','1h',3600],['4H','4h',14400],['D','1day',86400],['W','1week',604800],['M','1month',2629800]];
+/* [label, Twelve Data interval, seconds, how it's built]
+   4H, D and W are built here from 1-hour candles on the forex day that FXCM and IC Markets use:
+   the day starts at 17:00 New York time (06:00 SGT in US winter, 05:00 in US summer). */
+const TFS = [['1m','1min',60,'raw'],['3m','1min',180,'clock'],['5m','5min',300,'raw'],['15m','15min',900,'raw'],['30m','30min',1800,'raw'],
+             ['1H','1h',3600,'raw'],['4H','1h',14400,'session'],['D','1h',86400,'session'],['W','1h',604800,'week'],['M','1month',2629800,'raw']];
 const tfInfo = lab => TFS.find(x=>x[0]===lab) || TFS[3];
 const XAU_PIP = 0.1;
 const CH_COLORS = ['#e3b54f','#6fd3e8','#35d39a','#ff6b6b','#e9ecef'];
@@ -1954,12 +1957,31 @@ async function tdFetch(interval, n){
     return { t: Math.round(Date.parse(dt)/1000), o:+v.open+off, h:+v.high+off, l:+v.low+off, c:+v.close+off };
   }).filter(b=> isFinite(b.t) && isFinite(b.c)).sort((a,b)=>a.t-b.t);
 }
-function chAgg(bars, sec){
+/* New York UTC offset in seconds (EST -5h, EDT -4h: 2nd Sunday of March to 1st Sunday of November) */
+const NY_DST = {};
+function nyOff(t){
+  const y = new Date(t*1000).getUTCFullYear();
+  let r = NY_DST[y];
+  if(!r){
+    const sun = (m, nth) => { const d = new Date(Date.UTC(y, m, 1)); const first = (7 - d.getUTCDay()) % 7; return Date.UTC(y, m, 1 + first + 7*(nth-1)) / 1000; };
+    r = NY_DST[y] = { on: sun(2, 2) + 7*3600, off: sun(10, 1) + 6*3600 };
+  }
+  return (t >= r.on && t < r.off) ? -4*3600 : -5*3600;
+}
+/* start of the bucket a bar belongs to */
+function chBucket(t, sec, mode){
+  if(mode==='clock') return Math.floor(t/sec)*sec;
+  const off = nyOff(t), local = t + off - 17*3600;                /* forex-day clock: 0 = 17:00 New York */
+  if(mode==='week'){ const day = Math.floor(local/86400), sunday = day - ((day + 4) % 7); return sunday*86400 + 17*3600 - off; }
+  return Math.floor(local/sec)*sec + 17*3600 - off;
+}
+function chAgg(bars, sec, mode){
   const out = [];
-  bars.forEach(b=>{ const t = Math.floor(b.t/sec)*sec, L = out[out.length-1];
+  bars.forEach(b=>{ const t = chBucket(b.t, sec, mode || 'clock'), L = out[out.length-1];
     if(L && L.t===t){ L.h = Math.max(L.h,b.h); L.l = Math.min(L.l,b.l); L.c = b.c; } else out.push({t, o:b.o, h:b.h, l:b.l, c:b.c}); });
   return out;
 }
+const chBuild = (raw, lab) => { const [, , sec, mode] = tfInfo(lab); return mode==='raw' ? raw : chAgg(raw, sec, mode); };
 const chBar = b => ({ time: b.t + SGT_S, open:b.o, high:b.h, low:b.l, close:b.c });
 const chSec = () => tfInfo(CH.tf)[2];
 const r2p = p => Math.round(p*100)/100;
@@ -2025,35 +2047,37 @@ function chSetData(){
   if(!CH.fitted[CH.tf]){ CH.fitted[CH.tf] = 1; const n = CH.bars.length; CH.chart.timeScale().setVisibleLogicalRange({ from: Math.max(0, n-120), to: n+12 }); }
 }
 async function chLoad(force){
-  const [lab, iv] = tfInfo(CH.tf), c = CH.cache[lab];
-  if(c && !force && Date.now()-c.at < 15*60e3){ CH.bars = c.bars; chSetData(); chStatus(); return; }
+  const lab = CH.tf, iv = tfInfo(lab)[1], c = CH.cache[iv];
+  if(c && !force && Date.now()-c.at < 15*60e3){ CH.bars = chBuild(c.bars, lab); chSetData(); chStatus(); return; }
   CH.loading = true; chStatus();
   try{
-    let bars = await tdFetch(iv, lab==='3m' ? 4500 : 1500);
-    if(lab==='3m') bars = chAgg(bars, 180);
-    CH.cache[lab] = { bars, at: Date.now() };
-    if(CH.tf===lab){ CH.bars = bars; chSetData(); }
+    const raw = await tdFetch(iv, (iv==='1h' || iv==='1min') ? 5000 : 1500);
+    CH.cache[iv] = { bars: raw, at: Date.now() };
+    if(CH.tf===lab){ CH.bars = chBuild(raw, lab); chSetData(); }
     CH.err = ''; CH.lastAt = Date.now(); CH.seen = null;
   }catch(e){ CH.err = e.message==='nokey' ? '' : e.message; }
   CH.loading = false; chStatus();
 }
-/* once a minute: refresh the last candles (1 request) and check alerts */
+/* once a minute: refresh the newest candles of the base interval (1 request), rebuild, check alerts */
 async function chTick(){
-  if(document.hidden || !tdKey() || CH.busy || !S.accounts) return;
+  if(document.hidden || !tdKey() || CH.busy) return;
   const onChart = UI.tab==='chart' && CH.chart;
   const armed = (S.alerts||[]).some(a=>a.active);
   if(!onChart && !armed) return;
   CH.busy = true;
   try{
-    const [lab, iv] = tfInfo(CH.tf);
-    let fresh = await tdFetch(iv, lab==='3m' ? 6 : 3);
-    if(lab==='3m') fresh = chAgg(fresh, 180);
-    const c = CH.cache[lab];
+    const lab = CH.tf, iv = tfInfo(lab)[1];
+    const fresh = await tdFetch(iv, iv==='1min' ? 4 : 3);
+    const c = CH.cache[iv];
     if(c){ fresh.forEach(b=>{ const B = c.bars, i = B.length-1; if(i>=0 && B[i].t===b.t) B[i] = b; else if(i<0 || b.t > B[i].t) B.push(b); }); c.at = Date.now(); }
-    if(onChart && CH.series && CH.tf===lab){ CH.bars = c ? c.bars : CH.bars; fresh.forEach(b=>{ try{ CH.series.update(chBar(b)); }catch(e){} }); }
+    if(onChart && CH.series && c && CH.tf===lab){
+      const built = chBuild(c.bars, lab), lastT = CH.bars.length ? CH.bars[CH.bars.length-1].t : -1;
+      CH.bars = built;
+      built.slice(-3).forEach(b=>{ if(b.t >= lastT - tfInfo(lab)[2]*2){ try{ CH.series.update(chBar(b)); }catch(e){} } });
+    }
     const last = fresh[fresh.length-1]; if(last){ CH.lastPrice = last.c; }
     CH.lastAt = Date.now(); CH.err = '';
-    chCheckAlerts(fresh, lab);
+    chCheckAlerts(fresh, iv);
   }catch(e){ if(e.message!=='nokey') CH.err = e.message; }
   CH.busy = false; chStatus();
 }
@@ -2377,7 +2401,7 @@ function renderChart(){
   if(!CH.built || !document.getElementById('ch-box')){
     CH.built = true; CH.chart = null;
     el.innerHTML = `
-    <div class="page-head ch-head"><div><h2>Chart <span class="ch-sym">XAUUSD</span></h2><p id="ch-sub">Twelve Data · times in SGT</p></div>
+    <div class="page-head ch-head"><div><h2>Chart <span class="ch-sym">XAUUSD</span></h2><p id="ch-sub">Twelve Data · SGT · 4H/D/W on the 5pm New York day, like FXCM</p></div>
       <div class="ch-price"><b id="ch-last">—</b><small id="ch-stat">Loading…</small></div></div>
     <div class="ch-shell">
       <div class="ch-tfs" id="ch-tfs">${TFS.map(([l])=>`<button data-tf="${l}" class="${l===CH.tf?'on':''}">${l}</button>`).join('')}
