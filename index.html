@@ -1955,7 +1955,7 @@ async function tdFetch(interval, n){
   return j.values.map(v=>{
     const s = String(v.datetime||''); const dt = s.length===10 ? s+'T00:00:00Z' : s.replace(' ','T')+'Z';
     return { t: Math.round(Date.parse(dt)/1000), o:+v.open+off, h:+v.high+off, l:+v.low+off, c:+v.close+off };
-  }).filter(b=> isFinite(b.t) && isFinite(b.c)).sort((a,b)=>a.t-b.t);
+  }).filter(b=> isFinite(b.t) && isFinite(b.c) && (/day|week|month/.test(interval) || chOpen(b.t))).sort((a,b)=>a.t-b.t);
 }
 /* New York UTC offset in seconds (EST -5h, EDT -4h: 2nd Sunday of March to 1st Sunday of November) */
 const NY_DST = {};
@@ -1967,6 +1967,15 @@ function nyOff(t){
     r = NY_DST[y] = { on: sun(2, 2) + 7*3600, off: sun(10, 1) + 6*3600 };
   }
   return (t >= r.on && t < r.off) ? -4*3600 : -5*3600;
+}
+/* Gold trades Sunday 18:00 to Friday 17:00 New York, with a break 17:00-18:00 each day.
+   Twelve Data keeps sending flat candles while it's closed; FXCM shows none, so they are dropped. */
+function chOpen(t){
+  const d = new Date((t + nyOff(t))*1000), wd = d.getUTCDay(), h = d.getUTCHours();
+  if(wd===6) return false;
+  if(wd===5 && h>=17) return false;
+  if(wd===0 && h<18) return false;
+  return h!==17;
 }
 /* start of the bucket a bar belongs to */
 function chBucket(t, sec, mode){
