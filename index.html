@@ -500,7 +500,7 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:40}
 
 /* horizontal bars */
 .hbars{display:flex;flex-direction:column;gap:2px}
-.hb{display:grid;grid-template-columns:minmax(78px,26%) 1fr 64px;align-items:center;gap:12px;padding:7px 6px;margin:0 -6px;border-radius:var(--r-md);outline:none;cursor:default}
+.hb{display:grid;grid-template-columns:minmax(96px,30%) 1fr 64px;align-items:center;gap:12px;padding:7px 6px;margin:0 -6px;border-radius:var(--r-md);outline:none;cursor:default}
 .hb:hover,.hb:focus-visible{background:var(--s2)}
 .hb-l{display:flex;flex-direction:column;min-width:0}
 .hb-l b{font-size:.8rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -703,6 +703,107 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:40}
 .equity-foot{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .hdr-date{font-family:var(--mono);font-size:.64rem;font-weight:500;letter-spacing:.1em;color:var(--ink-faint);text-transform:uppercase;text-align:right;line-height:1.5}
 .cal-h.wknd{color:#434a53}
+
+/* ---------- morning plan ---------- */
+.kind-seg.three{grid-template-columns:repeat(3,1fr)}
+.kind-seg button.plan.on{background:var(--gold-a);color:var(--gold-hi);box-shadow:inset 0 0 0 1px var(--gold-line)}
+.kind-seg button svg{width:15px;height:15px}
+.plan-strip{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;margin-bottom:12px;background:var(--s1);border:1px dashed var(--gold-line);border-radius:var(--r-lg);color:var(--ink)}
+.plan-strip.has{border-style:solid;border-color:var(--line)}
+.plan-strip:hover{border-color:var(--gold)}
+.ps-ico{width:34px;height:34px;flex:none;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;background:var(--gold-a);color:var(--gold-hi)}
+.ps-ico svg{width:18px;height:18px;stroke:currentColor}
+.ps-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.ps-txt b{font-family:var(--disp);font-size:.9rem;font-weight:600}
+.ps-txt small{font-size:.72rem;color:var(--ink-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ps-cta{display:flex;align-items:center;gap:2px;font-size:.76rem;font-weight:600;color:var(--gold-hi);white-space:nowrap}
+.ps-cta svg{width:14px;height:14px;stroke:currentColor}
+.plan-card{background:var(--s2);border:1px solid var(--line-2);border-left:3px solid var(--gold);border-radius:var(--r-lg);padding:14px;margin:4px 0 16px}
+.pc-head{display:flex;align-items:center;gap:8px;color:var(--gold-hi)}
+.pc-head svg{width:16px;height:16px;stroke:currentColor}
+.pc-head b{font-family:var(--disp);font-size:.9rem;color:var(--ink)}
+.pc-sum{margin-left:auto;font-size:.7rem;color:var(--ink-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.plan-body .pb-k{font-family:var(--mono);font-size:.62rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin:12px 0 6px}
+.pb-chips{display:flex;flex-wrap:wrap;gap:5px}
+.pb-txt{font-size:.82rem;line-height:1.5;color:var(--ink-dim);white-space:pre-wrap}
+.lv-list{list-style:none;display:flex;flex-direction:column;gap:3px}
+.lv-list li{display:flex;align-items:baseline;gap:10px;font-size:.82rem;color:var(--ink-dim);padding:5px 8px;background:var(--s1);border:1px solid var(--line);border-radius:var(--r-md)}
+.lv-list b{font-family:var(--mono);font-weight:600;color:var(--gold-hi);min-width:62px}
+.scn{display:grid;grid-template-columns:auto 1fr;gap:4px 8px;align-items:baseline;font-size:.8rem;color:var(--ink);padding:8px 10px;background:var(--s1);border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:5px}
+.scn-if,.scn-then{font-family:var(--mono);font-size:.6rem;font-weight:700;letter-spacing:.08em;padding:2px 5px;border-radius:2px;text-align:center}
+.scn-if{background:var(--s3);color:var(--ink-dim)}
+.scn-then{background:var(--gold-a2);color:var(--gold-hi)}
+.ck-pill{font-size:.7rem;padding:3px 8px;border-radius:var(--r-sm);background:var(--s1);border:1px solid var(--line);color:var(--ink-faint)}
+.ck-pill.on{color:var(--green);border-color:var(--green-line);background:var(--green-a)}
+.pb-review{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-size:.74rem;color:var(--ink-faint)}
+.pb-review b{color:var(--ink);font-weight:600;margin-left:3px}
+.pb-review p{flex-basis:100%;font-size:.8rem;color:var(--ink-dim);line-height:1.45}
+.grade{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:20px;padding:0 6px;border-radius:var(--r-sm);font-family:var(--mono);font-size:.72rem;font-weight:700;margin-left:auto}
+.sym .grade{margin-left:6px;height:18px}
+.g-A{background:var(--green-a);color:var(--green);box-shadow:inset 0 0 0 1px var(--green-line)}
+.g-B{background:var(--gold-a2);color:var(--gold-hi);box-shadow:inset 0 0 0 1px var(--gold-line)}
+.g-C{background:var(--red-a);color:var(--red);box-shadow:inset 0 0 0 1px var(--red-line)}
+.plan-add{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;margin:4px 0 14px;border:1px dashed var(--gold-line);border-radius:var(--r-lg);color:var(--gold-hi);font-size:.82rem;font-weight:600;text-align:left}
+.plan-add span{flex:1}
+.plan-add svg{width:16px;height:16px;stroke:currentColor}
+.plan-add:hover{background:var(--gold-a)}
+/* editor */
+.scn-edit{display:grid;grid-template-columns:1fr auto;gap:6px 8px;padding:10px;background:var(--s1);border:1px solid var(--line-2);border-radius:var(--r-lg);margin-bottom:8px}
+.scn-edit .mini-btn{grid-row:1 / span 2;grid-column:2;align-self:center}
+.scn-in{display:flex;align-items:center;gap:8px;grid-column:1;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-md);padding:2px 8px}
+.scn-in:focus-within{border-color:var(--gold)}
+.scn-in input{flex:1;min-width:0;background:none;border:0;outline:0;padding:8px 0;font-size:.85rem;color:var(--ink)}
+.scn-in .scn-if,.scn-in .scn-then{min-width:38px}
+.checklist{display:flex;flex-direction:column;gap:6px}
+.ck{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;background:var(--s1);border:1px solid var(--line-2);border-radius:var(--r-md);font-size:.84rem;color:var(--ink-dim)}
+.ck .box{width:18px;height:18px;flex:none;border-radius:3px;border:1.5px solid var(--ink-faint);display:flex;align-items:center;justify-content:center}
+.ck .box svg{width:12px;height:12px;stroke:var(--on-gold);opacity:0;transform:scale(.4);transition:all .18s var(--ease, ease)}
+.ck.on{color:var(--ink);border-color:var(--gold-line)}
+.ck.on .box{background:var(--gold);border-color:var(--gold)}
+.ck.on .box svg{opacity:1;transform:none}
+/* trade form: structured fields, quick check, screenshot zones */
+.jf-wrap{background:var(--s1);border:1px solid var(--line);border-radius:var(--r-lg);padding:12px 12px 14px;margin-top:18px}
+.jf-head{font-family:var(--mono);font-size:.62rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin:2px 0 8px}
+.jf-head span{text-transform:none;letter-spacing:0;font-family:'Inter',sans-serif;font-weight:500}
+.jf-head:not(:first-child){margin-top:14px}
+.jf-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.jf-grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.jf{display:flex;flex-direction:column;gap:3px;background:var(--bg);border:1px solid var(--line-2);border-radius:var(--r-md);padding:6px 9px;min-width:0;cursor:text;transition:border-color .15s}
+.jf:focus-within{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-a)}
+.jf span{font-size:.6rem;font-weight:600;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.jf input{background:none;border:0;outline:0;font-family:var(--mono);font-size:.92rem;font-weight:500;color:var(--ink);width:100%;min-width:0;padding:1px 0}
+.jf input::placeholder{color:#3d444e}
+.qc{display:flex;flex-direction:column;gap:2px;background:var(--s1);border:1px solid var(--line);border-radius:var(--r-lg);padding:4px 12px}
+.qc-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;font-size:.84rem;color:var(--ink-dim)}
+.qc-row + .qc-row{border-top:1px solid var(--line)}
+.mini-seg{display:inline-flex;gap:2px;padding:2px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-md);flex:none}
+.mini-seg button{min-width:34px;padding:5px 9px;border-radius:var(--r-sm);font-size:.76rem;font-weight:600;color:var(--ink-faint);font-family:var(--mono)}
+.mini-seg button:hover{color:var(--ink)}
+.mini-seg button.on{background:var(--gold);color:var(--on-gold)}
+.shot-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.shot-cols .shots{grid-template-columns:repeat(auto-fill,minmax(72px,1fr))}
+.shot-cap{font-size:.7rem;color:var(--ink-faint);margin-bottom:6px}
+.grade-chip{min-width:46px;justify-content:center;font-family:var(--mono)!important;font-weight:700}
+/* calendar */
+.cal-cell.has-plan{box-shadow:inset 0 2px 0 var(--gold)}
+.cal-cell.today.has-plan{box-shadow:inset 0 2px 0 var(--gold),0 0 14px rgba(227,181,79,.18)}
+.cal-cell.plan-only{background:var(--s1)}
+.cal-cell.plan-only .p{color:var(--gold-hi)}
+.cal-cell.plan-only .p svg{width:12px;height:12px;stroke:currentColor;display:inline-block}
+.cal-cell.plan-only .c{color:var(--gold-hi)}
+.cal-cell .pg{position:absolute;bottom:3px;right:3px;font-size:.5rem;font-family:var(--mono);font-weight:700;padding:0 3px;border-radius:2px;line-height:1.5}
+.lg-plan{width:12px!important;height:12px!important;border-radius:2px;background:var(--s1);box-shadow:inset 0 2px 0 var(--gold);border:1px solid var(--line-2)}
+.plan-row .ava{color:var(--gold-hi)}
+.plan-row .ava svg{width:17px;height:17px;stroke:currentColor}
+.empty-state > svg{stroke:var(--ink-faint)}
+@media (min-width:700px){
+  .cal-cell .pg{font-size:.62rem;bottom:6px;right:6px;padding:1px 5px}
+  .cal-cell.plan-only .p svg{width:16px;height:16px}
+}
+@media (max-width:400px){
+  .jf-grid.four{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .shot-cols{grid-template-columns:1fr}
+}
 
 /* =====================================================================
    FX layer — type, HUD details, motion
@@ -955,7 +1056,7 @@ const MISSED_REASONS = [
 const reasonLabel = k => (MISSED_REASONS.find(r=>r[0]===k)||[null,'No type'])[1];
 
 function blankState(){
-  return { v:3, accounts:[], assets:[...DEFAULT_ASSETS], tags:[...DEFAULT_TAGS], tagGroups:{}, trades:[], missed:[], txns:[], settings:{ defaultAccountId:null, defaultAsset:'XAUUSD', beThreshold:0, lastBackupAt:null } };
+  return { v:3, accounts:[], assets:[...DEFAULT_ASSETS], tags:[...DEFAULT_TAGS], tagGroups:{}, trades:[], missed:[], txns:[], plans:[], settings:{ defaultAccountId:null, defaultAsset:'XAUUSD', beThreshold:0, lastBackupAt:null, planRules:['Levels marked on the chart','News times checked','Coach focus read'] } };
 }
 /* Fill in anything an older or partial copy is missing. Returns null if it isn't a journal. */
 function normalize(d){
@@ -968,6 +1069,11 @@ function normalize(d){
   if(!Array.isArray(d.trades)) d.trades = [];
   if(!Array.isArray(d.missed)) d.missed = [];
   if(!Array.isArray(d.txns)) d.txns = [];
+  /* Morning plans: one per day, not tied to an account */
+  if(!Array.isArray(d.plans)) d.plans = [];
+  d.plans = d.plans.filter(p=> p && typeof p==='object' && typeof p.date==='string');
+  d.plans.forEach(p=>{ ['assets','scenarios','checklist','images'].forEach(k=>{ if(!Array.isArray(p[k])) p[k] = []; }); });
+  if(!Array.isArray(d.settings.planRules)) d.settings.planRules = ['Levels marked on the chart','News times checked','Coach focus read'];
   /* Coach notes: written by the weekly review into the cloud copy, read-only in the app */
   if(!Array.isArray(d.briefs)) d.briefs = [];
   if(fillTagGroups(d) && d.tags.some(tg=>d.tagGroups[tg]!=='other')) d.settings.tagGroupsToReview = true;
@@ -1113,6 +1219,7 @@ function renderCalendar(){
   const wide = isWide();
   const dayMax = Math.max(1, ...Object.values(days).map(v=>Math.abs(v.pnl)));
   const weeksArr = []; let wStart = 1;
+  const monthPlans = (S.plans||[]).filter(p=>inMonth(p.date,y,m)).length;
 
   const daysInMonth = new Date(y, m+1, 0).getDate();
   const firstDow = (new Date(y, m, 1).getDay() + 6) % 7; /* Monday = 0 */
@@ -1125,20 +1232,22 @@ function renderCalendar(){
     const iso = y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
     const isToday = iso===tISO;
     if(col===0) wStart = d;
+    const pl = planFor(iso), pcls = pl ? ' has-plan' : '', pg = pl && pl.review && pl.review.grade ? `<span class="pg g-${esc(pl.review.grade)}">${esc(pl.review.grade)}</span>` : '';
     const mk = md ? `<span class="mk" aria-label="${md.n} log${md.n===1?'':'s'}">${md.n}</span>` : '';
     if(dd){
       week.pnl += dd.pnl; week.n += dd.n; week.w = (week.w||0) + (dd.w||0);
       const thr = Math.abs(S.settings.beThreshold||0);
       const kind = dd.pnl>thr?'pos':dd.pnl<-thr?'neg':'flat';
-      cells += `<button class="cal-cell ${kind} ${isToday?'today':''}" data-day="${iso}" style="--a:${(Math.abs(dd.pnl)/dayMax).toFixed(2)}">
-        <span class="d">${d}</span><span class="p">${kfmt(dd.pnl)}</span><span class="c">${dd.n} trade${dd.n===1?'':'s'}</span>${mk}
+      cells += `<button class="cal-cell ${kind} ${isToday?'today':''}${pcls}" data-day="${iso}" style="--a:${(Math.abs(dd.pnl)/dayMax).toFixed(2)}">
+        <span class="d">${d}</span><span class="p">${kfmt(dd.pnl)}</span><span class="c">${dd.n} trade${dd.n===1?'':'s'}</span>${mk}${pg}
       </button>`;
     } else if(md){
-      cells += `<button class="cal-cell missed-only ${isToday?'today':''}" data-day="${iso}">
-        <span class="d">${d}</span><span class="p" style="color:var(--gold-1)">—</span><span class="c">${md.n} log${md.n===1?'':'s'}</span>
+      cells += `<button class="cal-cell missed-only ${isToday?'today':''}${pcls}" data-day="${iso}">
+        <span class="d">${d}</span><span class="p" style="color:var(--gold-1)">—</span><span class="c">${md.n} log${md.n===1?'':'s'}</span>${pg}
       </button>`;
     } else {
-      cells += `<div class="cal-cell ${isToday?'today':''}"><span class="d">${d}</span></div>`;
+      cells += pl ? `<button class="cal-cell plan-only ${isToday?'today':''}${pcls}" data-day="${iso}"><span class="d">${d}</span><span class="p">${I_SUN}</span><span class="c">Plan</span>${pg}</button>`
+                  : `<div class="cal-cell ${isToday?'today':''}"><span class="d">${d}</span></div>`;
     }
     col++;
     if(col===7 || d===daysInMonth){
@@ -1195,7 +1304,7 @@ function renderCalendar(){
     </div>`;
   }
   const heatKey = monthN ? `<span class="heat-key">Smaller day<i style="--a:.15"></i><i style="--a:.45"></i><i style="--a:.75"></i><i style="--a:1"></i>Bigger day</span>` : '';
-  const legend = (missedMonth || monthN) ? `<div class="cal-legend">${heatKey}${missedMonth ? `<span><i style="border:1px dashed var(--gold-1)"></i>${wide?'':'<i style="width:7px;height:7px;border-radius:50%;background:var(--gold-1)"></i>'}Log (not counted)</span>` : ''}</div>` : '';
+  const legend = (missedMonth || monthN || monthPlans) ? `<div class="cal-legend">${heatKey}${monthPlans ? '<span><i class="lg-plan"></i>Morning plan</span>' : ''}${missedMonth ? `<span><i style="border:1px dashed var(--gold-1)"></i>${wide?'':'<i style="width:7px;height:7px;border-radius:50%;background:var(--gold-1)"></i>'}Log (not counted)</span>` : ''}</div>` : '';
   const hint = (monthN||missedMonth) ? `<p style="font-size:.72rem;color:var(--ink-dark-dim);margin:10px 4px 0;text-align:center">${wide?'Click':'Tap'} a day to review it.</p>` : '';
   const coach = coachCardHTML(!wide);
   /* month at a glance: line, weeks, green vs red days */
@@ -1220,10 +1329,11 @@ function renderCalendar(){
     ${hbarsHTML(weeksArr.filter(w=>!(isCurrent && w.from > now.getDate())).map(w=>({label:'W'+w.no, full:'Week '+w.no+' · '+w.from+'–'+w.to+' '+mS, sub: w.n ? w.from+'–'+w.to+' '+mS : 'no trades', pnl:w.pnl, n:w.n, w:w.w})))}
   </div>` : '';
   el.innerHTML = head + (wide
-    ? `<div class="cal-layout"><div>${monthRow}<div class="cal-grid">${cells}</div>${legend}${hint}</div><div class="cal-side">${coach}${summary}${extra}${glance}</div></div>`
-    : coach + monthRow + summary + `<div class="cal-grid">${cells}</div>` + legend + hint + `<div class="cal-glance">${glance}</div>`);
+    ? `<div class="cal-layout"><div>${monthRow}<div class="cal-grid">${cells}</div>${legend}${hint}</div><div class="cal-side">${isCurrent ? planStripHTML() : ''}${coach}${summary}${extra}${glance}</div></div>`
+    : (isCurrent ? planStripHTML() : '') + coach + monthRow + summary + `<div class="cal-grid">${cells}</div>` + legend + hint + `<div class="cal-glance">${glance}</div>`);
   fillCharts(el, {aid, y, m});
   const cm = el.querySelector('#coach-more'); if(cm) cm.onclick = openBriefsSheet;
+  wirePlanStrip(el);
 
   const calSel = el.querySelector('#cal-acct');
   if(calSel) calSel.onchange = e => { UI.statsAccountId = e.target.value; renderCalendar(); };
@@ -1237,14 +1347,19 @@ function openDaySheet(iso, opts){
   const trades = S.trades.filter(t=>t.accountId===aid && t.date===iso).sort((a,b)=>whenTs(b)-whenTs(a));
   const missedList = S.missed.filter(t=>t.accountId===aid && t.date===iso).sort((a,b)=>whenTs(b)-whenTs(a));
   const dayPnl = trades.reduce((s,t)=>s+tradePnl(t),0);
+  const pl = planFor(iso);
   openSheet(`
     <h3>${relDay(iso)}</h3>
     <p class="desc">${trades.length ? `${trades.length} trade${trades.length===1?'':'s'} · Day PnL <b style="color:${dayPnl>0?'var(--green-deep)':dayPnl<0?'var(--red-deep)':'inherit'}">${money(dayPnl,true)}</b>` : 'No trades taken'}${missedList.length ? ' · '+missedList.length+' log'+(missedList.length===1?'':'s') : ''}</p>
+    ${pl ? `<div class="plan-card"><div class="pc-head">${I_SUN}<b>Morning plan</b><span class="pc-sum">${esc(planSummary(pl))}</span></div>${planBodyHTML(pl)}<div class="row-btns" style="margin-top:12px"><button class="btn-soft" data-plan-edit>${I.pencil}Edit plan</button><button class="btn-soft ${pl.review?'':'gold'}" data-plan-review>${pl.review?'Edit check':'End-of-day check'}</button></div></div>` : (iso<=todaySGT() ? `<button class="plan-add" data-plan-edit>${I_SUN}<span>Add a morning plan for this day</span>${I.chevR}</button>` : '')}
     <div>
     ${trades.map(t=> tradeRowHTML(t, t.layers.length>1 ? t.layers.length+' layers' : '')).join('')}
     ${missedList.length ? `<div class="sub-head"><span>Logs</span><span style="color:var(--ink-faint)">not counted</span></div>${missedList.map(t=>tradeRowHTML(t,'')).join('')}` : ''}
     </div>
   `, opts);
+  const pe = sheetEl.querySelector('[data-plan-edit]'); if(pe) pe.onclick = ()=> closeSheet(()=> openPlanEditor(iso));
+  const pr = sheetEl.querySelector('[data-plan-review]'); if(pr) pr.onclick = ()=> closeSheet(()=> openPlanReview(iso));
+  const pcard = sheetEl.querySelector('.plan-card'); if(pcard) pcard.addEventListener('click', e=>{ const v = e.target.closest('[data-view]'); if(v && pl){ openViewer([...pl.images], pl.images.indexOf(v.dataset.view)); } });
   sheetEl.querySelectorAll('.trade-row').forEach(r=> r.onclick = ()=>{
     const t = entryById(r.dataset.id); if(!t) return;
     const keep = window.scrollY, listScroll = sheetEl.scrollTop;
@@ -1318,6 +1433,306 @@ function focusStripHTML(){
 /* ============================================================
    RENDER: STATS
    ============================================================ */
+/* ============================================================
+   MORNING PLAN — one per day: what you're watching, no bias.
+   { id, date, assets[], levels, news, scenarios[{if,then}], checklist[{text,done}],
+     notes, images[], review:{respected,followed,grade,note,at}|null, createdAt, updatedAt }
+   ============================================================ */
+const planFor = d => (S.plans||[]).filter(p=>p && p.date===d).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0] || null;
+const DEFAULT_PLAN_RULES = ['Levels marked on the chart','News times checked','Coach focus read'];
+const PLAN_DRAFT_KEY = 'tt_plan_draft';
+const REVIEW_Q = [
+  ['respected', 'Did price respect your levels?', [['yes','Yes'],['partly','Partly'],['no','No']]],
+  ['followed',  'Did you trade your plan?',       [['yes','Yes'],['partly','Partly'],['no','No'],['none','No trades']]],
+  ['grade',     'Grade the day',                  [['A','A'],['B','B'],['C','C']]]
+];
+const reviewLabel = (k, v) => { const q = REVIEW_Q.find(x=>x[0]===k); const o = q && q[2].find(x=>x[0]===v); return o ? o[1] : '—'; };
+const I_SUN = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+function blankPlan(date){
+  const b = latestBrief(), focus = b && b.focus && typeof b.focus.text==='string' ? b.focus.text.trim() : '';
+  const rules = [...(S.settings.planRules||DEFAULT_PLAN_RULES)];
+  if(focus) rules.unshift('Focus: '+focus);
+  return { id:null, date, assets: S.settings.defaultAsset ? [S.settings.defaultAsset] : [], levels:'', news:'',
+    scenarios:[{if:'', then:''}], checklist: rules.map(t=>({text:t, done:false})), notes:'', images:[], review:null };
+}
+function loadPlanForm(date){
+  const ex = planFor(date);
+  try{
+    const d = JSON.parse(localStorage.getItem(PLAN_DRAFT_KEY)||'null');
+    if(d && d.date===date && (d.id||null)===(ex ? ex.id : null)) return d;
+  }catch(e){}
+  return ex ? JSON.parse(JSON.stringify(ex)) : blankPlan(date);
+}
+const savePlanDraft = p => { try{ localStorage.setItem(PLAN_DRAFT_KEY, JSON.stringify(p)); }catch(e){} };
+const clearPlanDraft = () => { try{ localStorage.removeItem(PLAN_DRAFT_KEY); }catch(e){} };
+const planHasContent = p => !!(p && ((p.levels||'').trim() || (p.news||'').trim() || (p.notes||'').trim() || (p.images||[]).length || (p.scenarios||[]).some(s=>(s.if||'').trim()||(s.then||'').trim())));
+function openPlanEditor(date){
+  UI.planForm = loadPlanForm(date || todaySGT());
+  if(!UI.form || UI.form.editingId) UI.form = loadDraft() || blankForm();
+  UI.form.kind = 'plan';
+  UI.planReturn = UI.tab==='add' ? (UI.planReturn||'calendar') : UI.tab;
+  nav('add');
+}
+function levelLines(txt){ return String(txt||'').split('\n').map(x=>x.trim()).filter(Boolean); }
+function planSummary(p){
+  const n = levelLines(p.levels).length, s = (p.scenarios||[]).filter(x=>(x.if||'').trim()).length;
+  return [n ? n+' level'+(n===1?'':'s') : '', s ? s+' scenario'+(s===1?'':'s') : '', (p.assets||[]).join(', ')].filter(Boolean).join(' · ') || 'Notes only';
+}
+function planBodyHTML(p){
+  const lv = levelLines(p.levels), sc = (p.scenarios||[]).filter(x=>(x.if||'').trim()||(x.then||'').trim());
+  const ck = p.checklist||[], done = ck.filter(c=>c.done).length;
+  const r = p.review;
+  return `<div class="plan-body">
+    ${(p.assets||[]).length ? `<div class="pb-k">Watching</div><div class="pb-chips">${p.assets.map(a=>`<span class="mini-tag">${esc(a)}</span>`).join('')}</div>` : ''}
+    ${lv.length ? `<div class="pb-k">Key levels</div><ul class="lv-list">${lv.map(l=>{ const m = l.match(/^([\d.,]+)\s*(.*)$/); return m ? `<li><b>${esc(m[1])}</b><span>${esc(m[2])}</span></li>` : `<li><span>${esc(l)}</span></li>`; }).join('')}</ul>` : ''}
+    ${(p.news||'').trim() ? `<div class="pb-k">News &amp; sessions</div><p class="pb-txt">${esc(p.news.trim())}</p>` : ''}
+    ${sc.length ? `<div class="pb-k">Scenarios</div>${sc.map(x=>`<div class="scn"><span class="scn-if">IF</span><span>${esc(x.if||'…')}</span><span class="scn-then">THEN</span><span>${esc(x.then||'…')}</span></div>`).join('')}` : ''}
+    ${ck.length ? `<div class="pb-k">Checklist · ${done}/${ck.length}</div><div class="pb-chips">${ck.map(c=>`<span class="ck-pill ${c.done?'on':''}">${c.done?'✓ ':''}${esc(c.text)}</span>`).join('')}</div>` : ''}
+    ${(p.notes||'').trim() ? `<div class="pb-k">Notes</div><p class="pb-txt">${esc(p.notes.trim())}</p>` : ''}
+    ${(p.images||[]).length ? `<div class="shots" style="margin-top:10px">${p.images.map(id=>shotThumb(id,false)).join('')}</div>` : ''}
+    ${r ? `<div class="pb-review"><span>Levels respected <b>${reviewLabel('respected',r.respected)}</b></span><span>Traded the plan <b>${reviewLabel('followed',r.followed)}</b></span>${r.grade?`<span class="grade g-${esc(r.grade)}">${esc(r.grade)}</span>`:''}${(r.note||'').trim()?`<p>${esc(r.note.trim())}</p>`:''}</div>` : ''}
+  </div>`;
+}
+/* Calendar strip for today */
+function planStripHTML(){
+  const t = todaySGT(), p = planFor(t);
+  const sub = p ? (p.review ? 'Graded '+(p.review.grade||'—')+' · '+planSummary(p) : planSummary(p)) : 'Not written yet. Takes two minutes';
+  const cta = p ? (p.review ? 'View' : 'Open') : 'Write it';
+  return `<button class="plan-strip ${p?'has':''}" id="plan-strip"><span class="ps-ico">${I_SUN}</span><span class="ps-txt"><b>Today's plan</b><small>${esc(sub)}</small></span><span class="ps-cta">${cta}${I.chevR}</span></button>`;
+}
+function wirePlanStrip(root){
+  const b = root.querySelector('#plan-strip'); if(!b) return;
+  b.onclick = ()=>{ const t = todaySGT(); if(planFor(t)) openDaySheet(t); else openPlanEditor(t); };
+}
+
+/* ---- the editor (Add screen, third mode) ---- */
+function renderPlanEditor(el){
+  if(!UI.planForm) UI.planForm = loadPlanForm(todaySGT());
+  const p = UI.planForm, saved = !!p.id;
+  const IMGMAX = IMG_MAX_PER_ENTRY;
+  el.innerHTML = `
+  <div class="page-head"><div><h2>${saved ? 'Edit morning plan' : 'Morning plan'}</h2><p>What you're watching today. No bias, just levels and reactions</p></div></div>
+  ${focusStripHTML()}
+  <div class="kind-seg three" role="group" aria-label="Entry type">
+    <button data-kind="taken" aria-pressed="false">${I.check}Taken</button>
+    <button data-kind="missed" class="missed" aria-pressed="false">${I.eye}Log</button>
+    <button data-kind="plan" class="on plan" aria-pressed="true">${I_SUN}Plan</button>
+  </div>
+  <div class="add-grid"><div class="add-main">
+    <div class="section-label">Day</div>
+    <div class="field" style="max-width:260px">${I.cal}<input type="date" id="p-date" value="${p.date}" max="${maxEntryDate()}" aria-label="Plan date"></div>
+    ${S.assets.length ? `<div class="section-label">Watching <span class="optional">· tap all that apply</span></div>
+    <div class="chips" id="p-assets">${S.assets.map(s=>`<button class="select-chip ${(p.assets||[]).includes(s)?'on':''}" data-sym="${esc(s)}">${esc(s)}</button>`).join('')}</div>` : ''}
+    <div class="section-label">Key levels <span class="optional">· one per line</span></div>
+    <div class="field">${I.hash}<textarea id="p-levels" rows="4" placeholder="2385 DH&#10;2362 WOC&#10;2340 4OC">${esc(p.levels||'')}</textarea></div>
+    <div class="section-label">News &amp; sessions <span class="optional">· optional</span></div>
+    <div class="field">${I.clock}<textarea id="p-news" rows="2" placeholder="20:30 SGT CPI · London open 15:00">${esc(p.news||'')}</textarea></div>
+    <div class="section-label">Scenarios <span class="optional">· if price does this, I will…</span></div>
+    <div id="p-scn">${(p.scenarios||[]).map((x,i)=>`
+      <div class="scn-edit" data-i="${i}">
+        <div class="scn-in"><span class="scn-if">IF</span><input data-scn="if" value="${esc(x.if||'')}" placeholder="Price taps 2385 DH and rejects on 5m"></div>
+        <div class="scn-in"><span class="scn-then">THEN</span><input data-scn="then" value="${esc(x.then||'')}" placeholder="Look for the 5m engulf, SL above the wick"></div>
+        ${(p.scenarios||[]).length>1 ? `<button class="mini-btn" data-scn-rm="${i}" aria-label="Remove scenario">${I.x}</button>` : ''}
+      </div>`).join('')}
+    </div>
+    ${(p.scenarios||[]).length < 5 ? `<button class="select-chip ghost" id="p-scn-add" style="margin-top:8px">${I.plus}Add scenario</button>` : ''}
+    <div class="section-label">Notes <span class="optional">· optional</span></div>
+    <div class="field">${I.note}<textarea id="p-notes" rows="3" placeholder="Anything else: how you feel, what to avoid today">${esc(p.notes||'')}</textarea></div>
+  </div><div class="add-side">
+    <div class="section-label">Checklist <span class="optional">· tap to tick</span></div>
+    <div class="checklist" id="p-check">
+      ${(p.checklist||[]).map((c,i)=>`<button class="ck ${c.done?'on':''}" data-ck="${i}" aria-pressed="${!!c.done}"><span class="box">${I.check}</span><span>${esc(c.text)}</span></button>`).join('') || '<p class="missed-note" style="margin:0">No checklist items. Add some in Settings.</p>'}
+    </div>
+    <div class="section-label">Chart screenshots <span class="optional">· optional</span></div>
+    <div class="shots" id="p-shots">
+      ${(p.images||[]).map(id=>shotThumb(id,true)).join('')}
+      ${p.imgBusy ? `<div class="shot"><span class="busy">Adding…</span></div>` : ''}
+      ${(p.images||[]).length < IMGMAX ? `<button class="shot add" id="p-add-img">${I.img}<span>Add</span></button>` : ''}
+    </div>
+    <button class="btn-primary" id="p-save">${I.check}${saved ? 'Save changes' : 'Save plan'}</button>
+    ${saved && p.date <= todaySGT() ? `<button class="btn-soft" id="p-review" style="width:100%;margin-top:10px">${I_SUN}${p.review ? 'Edit end-of-day check' : 'End-of-day check'}</button>` : ''}
+    ${saved ? `<button class="btn-danger-ghost" id="p-del">${I.trash}Delete plan</button>` : ''}
+  </div></div>`;
+
+  const keep = ()=> savePlanDraft(p);
+  el.querySelectorAll('[data-kind]').forEach(b=> b.onclick = ()=>{ if(b.dataset.kind!=='plan'){ UI.form.kind = b.dataset.kind; renderAdd(); } });
+  const cs = el.querySelector('#coach-strip'); if(cs) cs.onclick = openBriefsSheet;
+  el.querySelector('#p-date').onchange = e=>{
+    const d = e.target.value || todaySGT();
+    if(d===p.date) return;
+    const ex = planFor(d);
+    if(ex){ UI.planForm = loadPlanForm(d); toast('Opened your plan for '+fmtDateShort(d)); }
+    else { p.date = d; if(p.id){ p.id = null; p.review = null; } }
+    keep(); renderAdd();
+  };
+  const pa = el.querySelector('#p-assets'); if(pa) pa.onclick = e=>{ const b = e.target.closest('[data-sym]'); if(!b) return; const s = b.dataset.sym; p.assets = p.assets.includes(s) ? p.assets.filter(x=>x!==s) : [...p.assets, s]; keep(); renderAdd(); };
+  const grow = ta => { ta.style.height='auto'; ta.style.height = Math.max(60, Math.min(ta.scrollHeight, 320))+'px'; };
+  [['#p-levels','levels'],['#p-news','news'],['#p-notes','notes']].forEach(([sel,k])=>{ const ta = el.querySelector(sel); ta.oninput = ()=>{ p[k] = ta.value; keep(); grow(ta); }; grow(ta); });
+  el.querySelector('#p-scn').oninput = e=>{ const row = e.target.closest('[data-i]'), k = e.target.dataset.scn; if(!row || !k) return; p.scenarios[+row.dataset.i][k] = e.target.value; keep(); };
+  el.querySelector('#p-scn').onclick = e=>{ const b = e.target.closest('[data-scn-rm]'); if(!b) return; p.scenarios.splice(+b.dataset.scnRm, 1); keep(); renderAdd(); };
+  const sa = el.querySelector('#p-scn-add'); if(sa) sa.onclick = ()=>{ p.scenarios.push({if:'', then:''}); keep(); renderAdd(); setTimeout(()=>{ const ins = document.querySelectorAll('#p-scn [data-scn="if"]'); if(ins.length) ins[ins.length-1].focus(); }, 30); };
+  el.querySelector('#p-check').onclick = e=>{ const b = e.target.closest('[data-ck]'); if(!b) return; const c = p.checklist[+b.dataset.ck]; c.done = !c.done; b.classList.toggle('on', c.done); b.setAttribute('aria-pressed', c.done); keep(); };
+  el.querySelector('#p-shots').onclick = e=>{
+    const rm = e.target.closest('[data-rm-img]'); if(rm){ p.images = p.images.filter(x=>x!==rm.dataset.rmImg); keep(); renderAdd(); return; }
+    const v = e.target.closest('[data-view]'); if(v){ openViewer([...p.images], p.images.indexOf(v.dataset.view)); return; }
+    if(e.target.closest('#p-add-img')){ UI.imgTarget = 'plan'; document.getElementById('img-file').click(); }
+  };
+  el.querySelector('#p-save').onclick = savePlan;
+  const rv = el.querySelector('#p-review'); if(rv) rv.onclick = ()=>{ savePlan(true); openPlanReview(p.date); };
+  const dl = el.querySelector('#p-del'); if(dl) dl.onclick = ()=> askSheet('Delete this plan?', 'This removes the plan for '+fmtDateShort(p.date)+' and its screenshots. Your trades stay.', 'Delete', ()=>{
+    const orig = (S.plans||[]).find(x=>x.id===p.id);
+    S.plans = S.plans.filter(x=>x.id!==p.id); if(orig) forgetImages(orig.images||[]);
+    save(); clearPlanDraft(); UI.planForm = null; UI.form.kind = 'taken'; toast('Plan deleted');
+    nav(UI.planReturn || 'calendar'); UI.planReturn = null;
+  });
+}
+function savePlan(stay){
+  const p = UI.planForm; if(!p) return;
+  if(p.imgBusy) return toast('Wait for the screenshots to finish adding');
+  if(!planHasContent(p)) return toast('Add a level, a scenario or a note first');
+  const now = Date.now(), orig = p.id ? (S.plans||[]).find(x=>x.id===p.id) : null;
+  const rec = { id: p.id || uid(), date: p.date, assets: [...(p.assets||[])], levels: (p.levels||'').trim(), news: (p.news||'').trim(),
+    scenarios: (p.scenarios||[]).map(x=>({if:(x.if||'').trim(), then:(x.then||'').trim()})).filter(x=>x.if||x.then),
+    checklist: (p.checklist||[]).map(c=>({text:c.text, done:!!c.done})), notes: (p.notes||'').trim(), images: [...(p.images||[])],
+    review: p.review || null, createdAt: orig ? (orig.createdAt||now) : now, updatedAt: now };
+  if(!rec.scenarios.length && stay!==true) rec.scenarios = [];
+  S.plans = (S.plans||[]).filter(x=>x.id!==rec.id); S.plans.push(rec);
+  if(orig) forgetImages((orig.images||[]).filter(id=>!rec.images.includes(id)));
+  save(); clearPlanDraft();
+  if(stay===true){ p.id = rec.id; return rec; }
+  UI.planForm = null; UI.form.kind = 'taken';
+  toast(orig ? 'Plan updated' : 'Plan saved · good luck today');
+  const dest = UI.planReturn || 'calendar'; UI.planReturn = null; nav(dest);
+  return rec;
+}
+/* ---- end-of-day check ---- */
+function openPlanReview(date){
+  const p = planFor(date); if(!p) return;
+  const r = Object.assign({respected:null, followed:null, grade:null, note:''}, p.review||{});
+  const dayTrades = S.trades.filter(t=>t.date===date);
+  if(!p.review && !dayTrades.length) r.followed = 'none';
+  openSheet(`
+    <h3>End-of-day check</h3>
+    <p class="desc">${esc(fmtDateShort(date))} · ${dayTrades.length} trade${dayTrades.length===1?'':'s'}${dayTrades.length ? ' · '+money(dayTrades.reduce((s,t)=>s+tradePnl(t),0),true) : ''}. Ten seconds, honest answers.</p>
+    ${REVIEW_Q.map(([k,label,opts])=>`<div class="section-label" style="margin-top:14px">${label}</div>
+      <div class="chips rv" data-rv="${k}">${opts.map(([v,l])=>`<button class="select-chip ${k==='grade'?'grade-chip':''} ${r[k]===v?'on':''}" data-v="${v}">${l}</button>`).join('')}</div>`).join('')}
+    <div class="section-label" style="margin-top:14px">One line on the day <span class="optional">· optional</span></div>
+    <div class="field">${I.note}<input id="rv-note" value="${esc(r.note||'')}" placeholder="What worked, what to change tomorrow"></div>
+    <button class="btn-primary" id="rv-save">${I.check}Save check</button>
+  `);
+  sheetEl.querySelectorAll('[data-rv]').forEach(g=> g.onclick = e=>{
+    const b = e.target.closest('[data-v]'); if(!b) return;
+    r[g.dataset.rv] = r[g.dataset.rv]===b.dataset.v ? null : b.dataset.v;
+    g.querySelectorAll('[data-v]').forEach(x=> x.classList.toggle('on', x.dataset.v===r[g.dataset.rv]));
+  });
+  document.getElementById('rv-save').onclick = ()=>{
+    r.note = document.getElementById('rv-note').value.trim();
+    if(!r.respected && !r.followed && !r.grade && !r.note) return toast('Answer at least one');
+    const cur = planFor(date); if(!cur) return closeSheet();
+    cur.review = { respected:r.respected, followed:r.followed, grade:r.grade, note:r.note, at:Date.now() };
+    cur.updatedAt = Date.now(); save();
+    closeSheet(()=>{ toast('Day checked'+(r.grade?' · '+r.grade:'')); if(UI.tab==='add' && UI.form && UI.form.kind==='plan'){ UI.planForm = loadPlanForm(date); } render(); });
+  };
+}
+/* ---- plan vs no plan, for Stats and the weekly report ---- */
+function planCompare(list){
+  const byDay = {}; list.forEach(t=>{ (byDay[t.date] = byDay[t.date] || []).push(t); });
+  const days = Object.keys(byDay);
+  const grp = ds => { const ts = ds.flatMap(d=>byDay[d]), pnl = ts.reduce((s,t)=>s+tradePnl(t),0), w = ts.filter(t=>classify(t)==='win').length;
+    return { days: ds.length, trades: ts.length, wins: w, pnl, winRate: ts.length ? w/ts.length*100 : null, avgDay: ds.length ? pnl/ds.length : null }; };
+  const tg = ts => { const pnl = ts.reduce((s,t)=>s+tradePnl(t),0), w = ts.filter(t=>classify(t)==='win').length;
+    return { trades: ts.length, wins: w, pnl, winRate: ts.length ? w/ts.length*100 : null, avgTrade: ts.length ? pnl/ts.length : null }; };
+  const grades = {};
+  ['A','B','C'].forEach(g=>{ const ds = days.filter(d=>{ const p = planFor(d); return p && p.review && p.review.grade===g; }); grades[g] = grp(ds); });
+  return { withPlan: grp(days.filter(d=>planFor(d))), noPlan: grp(days.filter(d=>!planFor(d))),
+    onPlan: tg(list.filter(t=>t.onPlan==='yes')), offPlan: tg(list.filter(t=>t.onPlan==='no')),
+    rulesKept: tg(list.filter(t=>t.rulesOk==='yes')), rulesBroken: tg(list.filter(t=>t.rulesOk==='no')), grades };
+}
+function planCardHTML(aid){
+  const pc = planCompare(S.trades.filter(t=>t.accountId===aid));
+  const wr = x => x.winRate===null ? '—' : Math.round(x.winRate)+'%';
+  const row = (label, x, val) => ({ label, full: label, sub: x.days!==undefined ? x.days+' day'+(x.days===1?'':'s')+' · '+wr(x) : x.trades+' trade'+(x.trades===1?'':'s')+' · '+wr(x), pnl: val||0, n: x.trades, w: x.wins });
+  const any = pc.withPlan.days > 0;
+  const gr = ['A','B','C'].filter(g=>pc.grades[g].days);
+  return `<div class="card-navy" id="plan-card">
+    <div class="card-title"><h3>Morning plan</h3><span class="sub">All time · avg per day</span></div>
+    ${any ? `
+      ${hbarsHTML([row('Plan days', pc.withPlan, pc.withPlan.avgDay), row('No plan', pc.noPlan, pc.noPlan.avgDay)])}
+      ${(pc.onPlan.trades || pc.offPlan.trades) ? `<div class="sub-head" style="margin-top:16px"><span>Trades, avg each</span></div>${hbarsHTML([row('On plan', pc.onPlan, pc.onPlan.avgTrade), row('Off plan', pc.offPlan, pc.offPlan.avgTrade)].filter(r=>r.n))}` : ''}
+      ${(pc.rulesKept.trades || pc.rulesBroken.trades) ? `<div class="sub-head" style="margin-top:16px"><span>Rules, avg per trade</span></div>${hbarsHTML([row('Kept', pc.rulesKept, pc.rulesKept.avgTrade), row('Broken', pc.rulesBroken, pc.rulesBroken.avgTrade)].filter(r=>r.n))}` : ''}
+      ${gr.length ? `<div class="sub-head" style="margin-top:16px"><span>By grade, avg per day</span></div>${hbarsHTML(gr.map(g=>row('Grade '+g, pc.grades[g], pc.grades[g].avgDay)))}` : ''}
+      <p class="setup-note">Compares days you wrote a plan against days you didn't. Give it a few weeks before reading much into it.</p>`
+    : `<div class="empty-chart">Write a morning plan before you trade. After a few days this shows whether planned days do better.<br><button class="btn-soft gold" id="plan-card-cta" style="margin:14px auto 0;display:inline-flex">${I_SUN}Write today's plan</button></div>`}
+  </div>`;
+}
+
+/* ---- structured Plan / Result fields on the trade form ---- */
+function writeJournalLine(notes, kind, vals){
+  const isPlan = kind==='plan';
+  const re = new RegExp('^(\\s*)'+(isPlan ? '(?:Plan|P)' : '(?:Result|E)')+'\\s*:(.*)$', 'im');
+  const m = notes.match(re);
+  let rest = m ? m[2] : '';
+  if(isPlan) rest = rest.replace(/(SL|TP)\s*\d+(?:\.\d+)?/ig,'').replace(/\d{3,}(?:\.\d+)?/, '');
+  else rest = rest.replace(/Best\s*\+?\s*\d*(?:\.\d+)?/i,'').replace(/Worst\s*-?\s*\d*(?:\.\d+)?/i,'').replace(/\bout\s*@?\s*\d*(?:\.\d+)?/i,'').replace(/BE\s*@\s*\d*(?:\.\d+)?/i,'');
+  rest = rest.replace(/\s+/g,' ').trim();
+  const line = isPlan
+    ? 'Plan: ' + [vals.entry, vals.sl ? 'SL'+vals.sl : '', vals.tp ? 'TP'+vals.tp : '', rest].filter(Boolean).join(' ')
+    : 'Result: ' + [vals.best ? 'Best+'+vals.best : 'Best+', vals.worst ? 'Worst-'+vals.worst : 'Worst-', vals.exit ? 'out'+vals.exit : 'out', vals.be ? 'BE@'+vals.be : 'BE@', rest].filter(Boolean).join(' ');
+  if(m) return notes.replace(re, line);
+  if(isPlan) return line + (notes ? '\n' + notes : '\n');
+  const lines = notes.split('\n');
+  let at = lines.findIndex(l=>/^\s*(During)\s*:/i.test(l));
+  if(at<0) at = lines.findIndex(l=>/^\s*(Plan|P)\s*:/i.test(l));
+  lines.splice(at<0 ? lines.length : at+1, 0, line);
+  return lines.join('\n');
+}
+function journalFieldsHTML(f){
+  const pj = parseJournal({ notes:f.notes||'', asset:f.asset, direction:f.direction, layers:[] });
+  const v = x => x===null || x===undefined ? '' : String(x);
+  const box = (k, label, val, ph) => `<label class="jf"><span>${label}</span><input inputmode="decimal" autocomplete="off" data-jf="${k}" value="${esc(v(val))}" placeholder="${ph}"></label>`;
+  return `<div class="jf-wrap">
+    <div class="jf-head">Plan <span>· writes the Plan line</span></div>
+    <div class="jf-grid">${box('entry','Entry',pj.entry,'4289.5')}${box('sl','SL pips',pj.slPips,'30')}${box('tp','TP pips',pj.tpPips,'60')}</div>
+    <div class="jf-head">Result <span>· writes the Result line</span></div>
+    <div class="jf-grid four">${box('exit','Exit',pj.exitPrice,'4301.2')}${box('best','Best +',pj.bestPips,'40')}${box('worst','Worst −',pj.worstPips===null?null:Math.abs(pj.worstPips),'7')}${box('be','BE@',pj.beAtPips,'—')}</div>
+  </div>`;
+}
+function wireJournalFields(el, f, ta, after){
+  const wrap = el.querySelector('.jf-wrap'); if(!wrap) return;
+  const read = () => { const o = {}; wrap.querySelectorAll('[data-jf]').forEach(i=>{ o[i.dataset.jf] = cleanNum(i.value); }); return o; };
+  wrap.oninput = e=>{
+    const k = e.target.dataset.jf; if(!k) return;
+    const c = cleanNum(e.target.value); if(c!==e.target.value) e.target.value = c;
+    const vals = read();
+    f.notes = writeJournalLine(f.notes||'', ['entry','sl','tp'].includes(k) ? 'plan' : 'result', vals);
+    ta.value = f.notes; after();
+  };
+  ta.addEventListener('input', ()=>{
+    const pj = parseJournal({ notes:f.notes||'', asset:f.asset, direction:f.direction, layers:[] });
+    const map = { entry:pj.entry, sl:pj.slPips, tp:pj.tpPips, exit:pj.exitPrice, best:pj.bestPips, worst:pj.worstPips===null?null:Math.abs(pj.worstPips), be:pj.beAtPips };
+    wrap.querySelectorAll('[data-jf]').forEach(i=>{ if(i!==document.activeElement) i.value = map[i.dataset.jf]===null ? '' : String(map[i.dataset.jf]); });
+  });
+}
+function quickCheckHTML(f){
+  const seg = (k, opts) => `<div class="mini-seg" data-qc="${k}">${opts.map(([v,l])=>`<button type="button" data-v="${v}" class="${String(f[k])===String(v)?'on':''}">${l}</button>`).join('')}</div>`;
+  const hasPlan = !!planFor(f.date);
+  return `<div class="section-label">Quick check <span class="optional">· optional, two taps</span></div>
+  <div class="qc">
+    ${hasPlan ? `<div class="qc-row"><span>Part of today's plan?</span>${seg('onPlan',[['yes','Yes'],['no','No']])}</div>` : ''}
+    <div class="qc-row"><span>Followed your rules?</span>${seg('rulesOk',[['yes','Yes'],['no','No']])}</div>
+    <div class="qc-row"><span>Confidence</span>${seg('confidence',[[1,'1'],[2,'2'],[3,'3'],[4,'4'],[5,'5']])}</div>
+  </div>`;
+}
+function wireQuickCheck(el, f){
+  el.querySelectorAll('[data-qc]').forEach(g=> g.onclick = e=>{
+    const b = e.target.closest('[data-v]'); if(!b) return;
+    const k = g.dataset.qc, val = k==='confidence' ? +b.dataset.v : b.dataset.v;
+    f[k] = f[k]===val ? null : val;
+    g.querySelectorAll('[data-v]').forEach(x=> x.classList.toggle('on', String(f[k])===x.dataset.v));
+    saveDraft(f);
+  });
+}
+
 function renderStats(){
   const el = document.getElementById('view-stats');
   if(!S.accounts.length){ el.innerHTML = emptyOnboard(); return; }
@@ -1453,6 +1868,7 @@ function renderStats(){
         </select>
         ${I.chevD}
       </div>`:`<span class="ph-acct">${esc(acct(aid).name)}</span>`}</div>`,
+    plan: planCardHTML(aid),
     kpis: kpiHTML({m, pnl:monthPnl, n:mt.length, days:dsr.day.filter(d=>d.n).length, day:dsr.day, winrate, wins:wins.length, losses:losses.length, bes:bes.length, pf, grossW, grossL}),
     perf: `
   <div class="card-navy chart-card">
@@ -1600,9 +2016,10 @@ function renderStats(){
 `
   };
   el.innerHTML = isWide()
-    ? `${C.head}${C.month}<div class="stats-top">${C.perf}<div>${C.hero}${C.goal}</div></div>${C.kpis}<div class="chart-pair">${C.weekday}${C.hour}</div><div class="stats-cols"><div>${C.equity}${C.monthly}${C.missed}</div><div>${C.asset}${C.combo}${C.setup}</div></div>`
-    : C.head + C.hero + C.month + C.kpis + C.perf + C.goal + `<div class="chart-pair">${C.weekday}${C.hour}</div>` + C.equity + C.monthly + C.asset + C.combo + C.missed + C.setup;
+    ? `${C.head}${C.month}<div class="stats-top">${C.perf}<div>${C.hero}${C.goal}</div></div>${C.kpis}<div class="chart-pair">${C.weekday}${C.hour}</div><div class="stats-cols"><div>${C.plan}${C.equity}${C.monthly}${C.missed}</div><div>${C.asset}${C.combo}${C.setup}</div></div>`
+    : C.head + C.hero + C.month + C.kpis + C.perf + C.goal + C.plan + `<div class="chart-pair">${C.weekday}${C.hour}</div>` + C.equity + C.monthly + C.asset + C.combo + C.missed + C.setup;
   fillCharts(el, {aid, y, m});
+  const pcc = el.querySelector('#plan-card-cta'); if(pcc) pcc.onclick = ()=> openPlanEditor(todaySGT());
   const mo = el.querySelector('[data-missed-open]');
   if(mo) mo.onclick = ()=>{ UI.historyKind = 'missed'; UI.historyFilter = S.accounts.length>1 ? aid : 'all'; UI.historyTag = 'all'; UI.historyLimit = 150; nav('history'); };
 
@@ -1974,7 +2391,7 @@ function blankForm(){
   const d = defAcct();
   return { editingId:null, accountId: d ? d.id : null, asset: S.settings.defaultAsset || S.assets[0] || null,
            direction:'buy', entries:[{sign:1, str:''}], tags:[], notes:'', date: todaySGT(), time: nowSGT(), kind:'taken', reason:null, images:[],
-           planAt:null, resultAt:null, planWas:false, resultWas:false };
+           planAt:null, resultAt:null, planWas:false, resultWas:false, afterIds:[], onPlan:null, rulesOk:null, confidence:null };
 }
 function formFromTrade(t){
   const layers = t.layers||[];
@@ -1982,6 +2399,7 @@ function formFromTrade(t){
     entries: layers.length ? layers.map(v=>({sign: v<0?-1:1, str: String(Math.abs(v))})) : [{sign:1, str:''}],
     tags:[...(t.tags||[])], notes:t.notes||'', date:t.date, time: validTime(t.time) ? t.time : '', whenTouched:true,
     kind: t.missed ? 'missed' : 'taken', reason: t.reason||null, images:[...(t.images||[])],
+    afterIds:[...(t.afterIds||[])], onPlan:t.onPlan||null, rulesOk:t.rulesOk||null, confidence:t.confidence||null,
     planAt: t.planAt||null, resultAt: t.resultAt||null,
     /* lines already filled before this edit can't be timed, so they are never stamped as new */
     planWas: !t.planAt && planReady(t.notes), resultWas: !t.resultAt && resultReady(t.notes) };
@@ -2311,6 +2729,8 @@ function renderAdd(){
   if(!UI.form) UI.form = loadDraft() || blankForm();
   const f = UI.form;
   if(!acct(f.accountId)) f.accountId = defAcct().id;
+  if(f.kind==='plan' && !f.editingId){ renderPlanEditor(el); return; }
+  if(f.kind==='plan') f.kind = 'taken';
   const net = calcNet(f);
   const editing = !!f.editingId;
   /* a new entry keeps "now" until you change the date or time yourself */
@@ -2322,9 +2742,10 @@ function renderAdd(){
   <div class="page-head"><div><h2>${editing ? (missed?'Edit log':'Edit trade') : 'New entry'}</h2><p>${editing?'Update the details below.':'Log it while the details are fresh.'}</p></div></div>
   ${editing ? '' : focusStripHTML()}
 
-  <div class="kind-seg" role="group" aria-label="Entry type">
+  <div class="kind-seg ${editing?'':'three'}" role="group" aria-label="Entry type">
     <button data-kind="taken" class="${!missed?'on':''}" aria-pressed="${!missed}">${I.check}Taken</button>
     <button data-kind="missed" class="missed ${missed?'on':''}" aria-pressed="${missed}">${I.eye}Log</button>
+    ${editing ? '' : `<button data-kind="plan" class="plan" aria-pressed="false">${I_SUN}Plan</button>`}
   </div>
   ${missed?`<p class="missed-note">For forward testing and logging your analysis. Logs show on your calendar and in History, but never count toward your balance or stats.</p>`:''}
 
@@ -2352,6 +2773,7 @@ function renderAdd(){
 
   ${tagPickerHTML(f)}
 
+  ${(missed && f.reason==='analysis') ? '' : journalFieldsHTML(f)}
   <div class="section-label">Journal</div>
   <div class="chips" id="f-note-tools">
     <button class="select-chip ghost" id="f-tpl">${I.plus}Template</button>
@@ -2361,11 +2783,13 @@ function renderAdd(){
   <div class="field">${I.note}<textarea id="f-notes" placeholder="${missed?'What you saw, your plan, what price did after — tap Template to start':'Plan: 4289 SL30 TP60 — tap Template to start'}">${esc(f.notes)}</textarea></div>
 
   <div class="section-label">Screenshots <span class="optional">· optional</span></div>
-  <div class="shots" id="f-shots">
-    ${imgs.map(id=>shotThumb(id, true)).join('')}
-    ${f.imgBusy ? `<div class="shot"><span class="busy">Adding…</span></div>` : ''}
-    ${imgs.length < IMG_MAX_PER_ENTRY ? `<button class="shot add" id="f-add-img">${I.img}<span>Add</span></button>` : ''}
+  <div class="shot-cols">
+    ${[['before', missed ? 'At the time' : 'At entry'], ['after', 'After']].map(([z,cap])=>{
+      const ids = imgs.filter(id=> z==='after' ? (f.afterIds||[]).includes(id) : !(f.afterIds||[]).includes(id));
+      return `<div><div class="shot-cap">${cap}</div><div class="shots" data-zone="${z}">${ids.map(id=>shotThumb(id, true)).join('')}${f.imgBusy && (UI.imgTarget||'before')===z ? '<div class="shot"><span class="busy">Adding…</span></div>' : ''}${imgs.length < IMG_MAX_PER_ENTRY ? `<button class="shot add" data-add-img="${z}">${I.img}<span>Add</span></button>` : ''}</div></div>`;
+    }).join('')}
   </div>
+  ${missed ? '' : quickCheckHTML(f)}
   </div><div class="add-side">
 
   <div class="section-label">${missed ? 'Paper PnL <span class="optional">· optional</span>' : 'PnL calculator'}</div>
@@ -2395,16 +2819,18 @@ function renderAdd(){
   const fa = el.querySelector('#f-accounts'); if(fa) fa.onclick = e => { const b=e.target.closest('[data-id]'); if(b){ f.accountId=b.dataset.id; renderAdd(); } };
   const fs = el.querySelector('#f-assets'); if(fs) fs.onclick = e => { const b=e.target.closest('[data-sym]'); if(b){ f.asset=b.dataset.sym; renderAdd(); } };
   el.querySelectorAll('[data-dir]').forEach(b=> b.onclick = ()=>{ f.direction=b.dataset.dir; renderAdd(); });
-  el.querySelectorAll('[data-kind]').forEach(b=> b.onclick = ()=>{ if(f.kind!==b.dataset.kind){ f.kind = b.dataset.kind; rerenderForm(f); } });
+  el.querySelectorAll('[data-kind]').forEach(b=> b.onclick = ()=>{
+    if(b.dataset.kind==='plan'){ UI.planForm = UI.planForm || loadPlanForm(todaySGT()); UI.planReturn = UI.planReturn || 'calendar'; }
+    if(f.kind!==b.dataset.kind){ f.kind = b.dataset.kind; rerenderForm(f); } });
   const cstrip = el.querySelector('#coach-strip'); if(cstrip) cstrip.onclick = openBriefsSheet;
   const fr = el.querySelector('#f-reason'); if(fr) fr.onclick = e => { const b=e.target.closest('[data-reason]'); if(b){ f.reason = f.reason===b.dataset.reason ? null : b.dataset.reason; rerenderForm(f); } };
-  el.querySelector('#f-shots').onclick = e => {
+  el.querySelectorAll('.shots[data-zone]').forEach(zn=> zn.onclick = e => {
     const rm = e.target.closest('[data-rm-img]');
-    if(rm){ f.images = (f.images||[]).filter(x=>x!==rm.dataset.rmImg); rerenderForm(f); return; }
+    if(rm){ f.images = (f.images||[]).filter(x=>x!==rm.dataset.rmImg); f.afterIds = (f.afterIds||[]).filter(x=>x!==rm.dataset.rmImg); rerenderForm(f); return; }
     const v = e.target.closest('[data-view]');
-    if(v){ openViewer([...(f.images||[])], (f.images||[]).indexOf(v.dataset.view)); return; }
-    if(e.target.closest('#f-add-img')) document.getElementById('img-file').click();
-  };
+    if(v){ const ids = [...zn.querySelectorAll('[data-view]')].map(x=>x.dataset.view); openViewer(ids, ids.indexOf(v.dataset.view)); return; }
+    if(e.target.closest('[data-add-img]')){ UI.imgTarget = zn.dataset.zone; document.getElementById('img-file').click(); }
+  });
 
   el.querySelectorAll('.tag-group').forEach(row=> row.onclick = e => {
     const b=e.target.closest('[data-tag]');
@@ -2443,7 +2869,7 @@ function renderAdd(){
     saveDraft(f);
   };
 
-  el.querySelector('#f-date').onchange = e=>{ f.date = e.target.value || todaySGT(); f.whenTouched = true; saveDraft(f); };
+  el.querySelector('#f-date').onchange = e=>{ f.date = e.target.value || todaySGT(); f.whenTouched = true; saveDraft(f); rerenderForm(f); };
   el.querySelector('#f-time').onchange = e=>{ f.time = e.target.value || ''; f.whenTouched = true; saveDraft(f); };
   el.querySelector('#f-tpl').onclick = ()=>{
     const tpl = noteTemplate();
@@ -2463,6 +2889,8 @@ function renderAdd(){
   const growTa = ()=>{ ta.style.height='auto'; ta.style.height = Math.max(84, Math.min(ta.scrollHeight, 340)) + 'px'; };
   ta.oninput = e=>{ f.notes = e.target.value; f.journalConfirmed = false; stampTimes(f); saveDraft(f); growTa(); };
   growTa();
+  wireJournalFields(el, f, ta, ()=>{ f.journalConfirmed = false; stampTimes(f); saveDraft(f); growTa(); });
+  wireQuickCheck(el, f);
   el.querySelector('#f-save').onclick = saveTrade;
   const delBtn = el.querySelector('#f-delete');
   if(delBtn) delBtn.onclick = ()=> confirmSheet(missed?'Delete this entry?':'Delete this trade?', missed?'This removes the log and its screenshots. This can\'t be undone.':'This removes it from your journal and stats. This can\'t be undone.',()=>{
@@ -2512,6 +2940,8 @@ function saveTrade(){
     layers, tags: (missed && f.reason==='analysis') ? [] : (f.tags||[]), notes: f.notes.trim(), date: f.date || todaySGT(), time: validTime(f.time) ? f.time : null,
     images: [...(f.images||[])],
     planAt: f.planAt||null, resultAt: f.resultAt||null,
+    onPlan: (!missed && planFor(f.date || todaySGT())) ? (f.onPlan||null) : null, rulesOk: missed ? null : (f.rulesOk||null), confidence: missed ? null : (f.confidence||null),
+    afterIds: (f.afterIds||[]).filter(id=>(f.images||[]).includes(id)),
     createdAt: orig ? (orig.createdAt || stamp) : stamp,
     updatedAt: stamp
   };
@@ -2545,7 +2975,7 @@ function renderHistory(){
   const fid = UI.historyFilter;
   const ftag = UI.historyTag || 'all';
   const hk = UI.historyKind || 'trades';
-  const source = hk==='missed' ? S.missed : S.trades;
+  const source = hk==='missed' ? S.missed : hk==='plans' ? [] : S.trades;
   let all = [...source].sort((a,b)=> a.date===b.date ? (whenTs(b)-whenTs(a)) : (a.date<b.date?1:-1));
   if(fid!=='all') all = all.filter(t=>t.accountId===fid);
   if(ftag!=='all') all = all.filter(t=> (t.tags||[]).includes(ftag));
@@ -2581,6 +3011,13 @@ function renderHistory(){
     }
   }
 
+  if(hk==='plans'){
+    const ps = [...(S.plans||[])].sort((a,b)=> a.date<b.date ? 1 : -1);
+    listHtml = ps.length ? '<div style="margin-top:14px"></div>' + ps.map(p=>{
+      const dt = S.trades.filter(t=>t.date===p.date), pnl = dt.reduce((s,t)=>s+tradePnl(t),0), sc = (p.scenarios||[]).find(x=>(x.if||'').trim());
+      return `<button class="trade-row plan-row" data-plan="${esc(p.date)}"><span class="ava">${I_SUN}</span><span class="mid"><span class="sym">${esc(relDay(p.date))}${p.review && p.review.grade ? `<span class="grade g-${esc(p.review.grade)}">${esc(p.review.grade)}</span>` : (p.date<todaySGT() ? '<span class="dir-badge hind">NOT CHECKED</span>' : '')}</span><span class="meta">${esc(planSummary(p))}</span>${sc ? `<span class="note">${esc(sc.if)} → ${esc(sc.then||'…')}</span>` : ''}</span><span class="pnl ${pnl>0?'pos':pnl<0?'neg':'be'}">${dt.length ? money(pnl,true)+'<small>'+dt.length+' trade'+(dt.length===1?'':'s')+'</small>' : '<small>no trades</small>'}</span>${I.chevR}</button>`;
+    }).join('') : `<div class="empty-state" style="margin-top:14px">${I_SUN}<p><b>No morning plans yet.</b><br>Open Add entry and switch to Plan, or tap "Today's plan" on the Calendar.</p></div>`;
+  }
   let histSum = '';
   if(hk==='trades' && all.length){
     const net = all.reduce((s,t)=>s+tradePnl(t),0), hw = all.filter(t=>classify(t)==='win').length, hl = all.filter(t=>classify(t)==='loss').length;
@@ -2593,15 +3030,16 @@ function renderHistory(){
   }
   el.innerHTML = `
   <div class="page-head"><div><h2>History</h2><p>Every entry, newest first</p></div></div>
-  <div class="kind-seg" role="group" aria-label="Show" style="margin:0 0 12px;max-width:420px">
+  <div class="kind-seg three" role="group" aria-label="Show" style="margin:0 0 12px;max-width:480px">
     <button data-hk="trades" class="${hk==='trades'?'on':''}" aria-pressed="${hk==='trades'}">Trades · ${S.trades.length}</button>
     <button data-hk="missed" class="missed ${hk==='missed'?'on':''}" aria-pressed="${hk==='missed'}">Logs · ${S.missed.length}</button>
+    <button data-hk="plans" class="plan ${hk==='plans'?'on':''}" aria-pressed="${hk==='plans'}">Plans · ${(S.plans||[]).length}</button>
   </div>
-  ${S.accounts.length>1?`<div class="filter-scroll">
+  ${hk!=='plans' && S.accounts.length>1?`<div class="filter-scroll">
     <button class="select-chip ${fid==='all'?'on':''}" data-f="all">All accounts</button>
     ${S.accounts.map(a=>`<button class="select-chip ${fid===a.id?'on':''}" data-f="${a.id}">${esc(a.name)}</button>`).join('')}
   </div>`:''}
-  ${S.tags.length?`<div class="filter-scroll" style="margin-top:6px">
+  ${hk!=='plans' && S.tags.length?`<div class="filter-scroll" style="margin-top:6px">
     <button class="select-chip ${ftag==='all'?'on':''}" data-t="all">All tags</button>
     ${S.tags.map(tg=>`<button class="select-chip ${ftag===tg?'on':''}" data-t="${esc(tg)}">${esc(tg)}</button>`).join('')}
   </div>`:''}
@@ -2616,6 +3054,7 @@ function renderHistory(){
       const bt=e.target.closest('[data-t]'); if(bt){ UI.historyTag=bt.dataset.t; UI.historyLimit=150; renderHistory(); }
     };
   });
+  el.querySelectorAll('[data-plan]').forEach(r=> r.onclick = ()=> openDaySheet(r.dataset.plan));
   const more = el.querySelector('#h-more');
   if(more) more.onclick = ()=>{ const keep = window.scrollY; UI.historyLimit = (UI.historyLimit||150) + 150; renderHistory(); window.scrollTo({top:keep}); };
   el.querySelectorAll('.trade-row').forEach(r=> r.onclick = ()=>{
@@ -2727,6 +3166,12 @@ function renderSettings(){
   </div>
 
   <div class="card-glass">
+    <div class="card-title"><h3>Morning checklist</h3></div>
+    <p style="font-size:.78rem;color:var(--ink-faint);margin-bottom:12px">Ticked off in each morning plan. Your coach's current focus is added on top automatically.</p>
+    <div>${(S.settings.planRules||[]).map((r,i)=>`<span class="asset-tag" data-rule="${i}"><span>${esc(r)}</span><button data-act="rm-rule" aria-label="Remove ${esc(r)}">${I.x}</button></span>`).join('')}<span class="asset-tag" style="background:transparent;border:1px dashed var(--line-2)"><button data-act="add-rule" style="display:flex;align-items:center;gap:6px;font:inherit;color:var(--ink-faint)">${I.plus}Add</button></span></div>
+  </div>
+
+  <div class="card-glass">
     <div class="card-title"><h3>Data</h3></div>
     <p style="font-size:.78rem;color:var(--ink-dark-dim);margin-bottom:8px">${SM.key ? 'Your journal is saved on this device and synced to the cloud. A backup file is an extra copy you keep yourself.' : 'Your journal lives on this device. Export a backup regularly, or turn on Sync above.'} Backups include your screenshots.</p>
     ${(()=>{
@@ -2785,6 +3230,13 @@ function renderSettings(){
     };
   });
   el.querySelector('[data-act="add-asset"]').onclick = ()=> openAssetSheet(()=> renderSettings());
+  el.querySelectorAll('[data-act="rm-rule"]').forEach(b=> b.onclick = ()=>{ const i = +b.closest('[data-rule]').dataset.rule; S.settings.planRules = (S.settings.planRules||[]).filter((_,j)=>j!==i); save(); renderSettings(); });
+  el.querySelector('[data-act="add-rule"]').onclick = ()=>{
+    openSheet(`<h3>New checklist item</h3><p class="desc">Something to tick before you trade, e.g. "Sized for 1% risk".</p><div class="field">${I.check}<input id="sh-rule" maxlength="80" placeholder="Checklist item" autocomplete="off"></div><button class="btn-primary" id="sh-rule-ok">${I.check}Add item</button>`);
+    const inp = document.getElementById('sh-rule'); setTimeout(()=> inp.focus(), 60);
+    const go = ()=>{ const v = inp.value.trim(); if(!v) return toast('Type the item first'); S.settings.planRules = [...(S.settings.planRules||[]), v]; save(); closeSheet(()=> renderSettings()); };
+    document.getElementById('sh-rule-ok').onclick = go; inp.onkeydown = e=>{ if(e.key==='Enter') go(); };
+  };
   el.querySelectorAll('[data-act="add-tag"]').forEach(b=> b.onclick = ()=> openTagSheet(()=> renderSettings(), b.dataset.group));
   el.querySelectorAll('[data-act="tag-group"]').forEach(b=> b.onclick = ()=> openTagGroupSheet(b.closest('[data-tg]').dataset.tg));
   const grpOk = el.querySelector('#s-groups-ok');
@@ -3357,14 +3809,15 @@ async function exportWeekly(from, to, withShots){
   /* screenshots go in the zip, named date_time_kind_asset_direction_n so they sort in order */
   const shots = [], used = new Set();
   const shotNames = (t, kind) => !withShots ? undefined : (t.images||[]).map((id, i)=>{
-    const base = 'screenshots/' + [t.date, validTime(t.time) ? t.time.replace(':','') : 'notime', kind,
+    const base = 'screenshots/' + [t.date, validTime(t.time) ? t.time.replace(':','') : 'notime', ((t.afterIds||[]).includes(id) ? kind+'-after' : kind),
       String(t.asset||'').replace(/[^A-Za-z0-9]+/g,'') || 'asset', t.direction, i+1].join('_');
     let name = base + '.jpg', k = 2;
     while(used.has(name)) name = base + '-' + (k++) + '.jpg';
     used.add(name); shots.push({ id, name }); return name;
   });
   const report = {
-    app:'tradetrackr', report:'weekly', version:4,
+    app:'tradetrackr', report:'weekly', version:5,
+    morningPlans: 'plansThisWeek holds the morning plan written before trading each day (levels, scenarios, checklist, end-of-day check). The trader has no daily bias by design. Trades carry onPlan (part of that day\'s plan), rulesFollowed and confidence (1-5) when filled in.',
     timezone: 'Times are Singapore time (SGT, UTC+8). time is null for entries saved before times were added.',
     journalFormat: 'Plan: entry SLpips TPpips | Before | During | Result: Best+pips Worst-pips out<price> BE@<pips in profit when stop moved to entry> | After: SL/TP/none then free text | Lesson',
     generatedAt: new Date().toISOString(),
@@ -3394,11 +3847,16 @@ async function exportWeekly(from, to, withShots){
       screenshots: shotNames(t, 'log')
     })),
     logsAllTimeByType: S.missed.reduce((o,t)=>{ const k = t.reason ? reasonLabel(t.reason) : '(no type)'; o[k] = (o[k]||0)+1; return o; }, {}),
+    plansThisWeek: (S.plans||[]).filter(p=>p.date>=from && p.date<=to).sort((a,b)=>a.date<b.date?-1:1).map(p=>{ const dt = S.trades.filter(t=>t.date===p.date);
+      return { date:p.date, watching:p.assets||[], levels:levelLines(p.levels), news:p.news||'', scenarios:p.scenarios||[], checklist:(p.checklist||[]).map(c=>(c.done?'[x] ':'[ ] ')+c.text),
+        notes:p.notes||'', endOfDay:p.review||null, tradesThatDay:dt.length, pnlThatDay:r2(dt.reduce((s,t)=>s+tradePnl(t),0)), screenshots: shotNames(Object.assign({}, p, {asset:'plan', direction:'day'}), 'plan') }; }),
+    planVsNoPlanAllTime: planCompare(S.trades),
     thisWeekByDirection: groupBlock(week, t=>[t.direction]),
     allTimeByDirection: groupBlock(S.trades, t=>[t.direction]),
     trades: week.map(t=>({
       date: t.date, time: validTime(t.time) ? t.time : null, asset: t.asset, direction: t.direction,
       pnl: r2(tradePnl(t)), layers: t.layers, result: classify(t),
+      onPlan: t.onPlan||null, rulesFollowed: t.rulesOk||null, confidence: t.confidence||null,
       tags: t.tags||[], groups: tradeGroups(t), tagCheck: tagIssues(t.tags), parsed: parseJournal(t), notes: t.notes||'',
       screenshots: shotNames(t, 'trade')
     }))
@@ -3459,7 +3917,7 @@ function makeZip(files){
 
 function exportCSV(){
   if(!S.trades.length) return toast('No trades to export yet');
-  const cols = ['Date','Time (SGT)','Account','Asset','Direction','PnL','Result','Tags','Notes'];
+  const cols = ['Date','Time (SGT)','Account','Asset','Direction','PnL','Result','Tags','Notes','On plan','Rules followed','Confidence'];
   const csvEsc = v => {
     const s = String(v ?? '');
     return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
@@ -3475,7 +3933,7 @@ function exportCSV(){
     .map(t=>{
       const p = tradePnl(t); const a = acct(t.accountId);
       const kind = classify(t);
-      return [csvEsc(t.date), csvEsc(validTime(t.time)?t.time:''), csvText(a?a.name:'Deleted account'), csvText(t.asset), csvEsc(t.direction.toUpperCase()), csvEsc(p.toFixed(2)), csvEsc(kind.toUpperCase()), csvText((t.tags||[]).join('; ')), csvText(t.notes||'')].join(',');
+      return [csvEsc(t.date), csvEsc(validTime(t.time)?t.time:''), csvText(a?a.name:'Deleted account'), csvText(t.asset), csvEsc(t.direction.toUpperCase()), csvEsc(p.toFixed(2)), csvEsc(kind.toUpperCase()), csvText((t.tags||[]).join('; ')), csvText(t.notes||''), csvEsc(t.onPlan||''), csvEsc(t.rulesOk||''), csvEsc(t.confidence||'')].join(',');
     });
   const csv = '\ufeff' + [cols.join(','), ...rows].join('\r\n');
   const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
@@ -3548,7 +4006,7 @@ function badResponse(r){
   else setSyncStatus('error', 'Sync service error ('+r.status+'). It will retry.');
   return false;
 }
-const collectIds = d => { const out = []; ['accounts','trades','missed','txns'].forEach(k=> (d[k]||[]).forEach(x=>{ if(x && x.id) out.push(k+':'+x.id); })); return out; };
+const collectIds = d => { const out = []; ['accounts','trades','missed','txns','plans'].forEach(k=> (d[k]||[]).forEach(x=>{ if(x && x.id) out.push(k+':'+x.id); })); return out; };
 
 /* Combine the cloud copy with this device's copy.
    Same entry on both: the most recently edited one wins.
@@ -3557,7 +4015,7 @@ function mergeStates(remote, local, baseIdsArr){
   const out = normalize(JSON.parse(JSON.stringify(remote))) || blankState();
   const base = new Set(baseIdsArr||[]);
   const stamp = x => x.updatedAt || x.createdAt || 0;
-  ['accounts','trades','missed','txns'].forEach(k=>{
+  ['accounts','trades','missed','txns','plans'].forEach(k=>{
     const r = out[k]||[], l = local[k]||[];
     const lMap = new Map(l.map(x=>[x.id,x])), rIds = new Set(r.map(x=>x.id));
     const res = [];
@@ -3786,7 +4244,7 @@ function forgetImages(ids){
   });
   if(SM.key){ const q = delQueue(); ids.forEach(id=>{ if(!q.includes(id)) q.push(id); }); setDelQueue(q); imgSyncSoon(); }
 }
-const referencedImages = () => { const s = new Set(); [...S.trades, ...S.missed].forEach(t=> (t.images||[]).forEach(id=>s.add(id))); return s; };
+const referencedImages = () => { const s = new Set(); [...S.trades, ...S.missed, ...(S.plans||[])].forEach(t=> (t.images||[]).forEach(id=>s.add(id))); return s; };
 
 let imgSyncBusy = false, imgSyncTimer = null;
 function imgSyncSoon(){ clearTimeout(imgSyncTimer); imgSyncTimer = setTimeout(imgSync, 400); }
@@ -3809,7 +4267,7 @@ async function imgSync(){
     /* keep recent screenshots on this device so they open offline */
     const have = new Set(await imgKeys());
     const cutoff = new Date(Date.now() - 60*86400000).toISOString().slice(0,10);
-    const recent = [...S.trades, ...S.missed].filter(t=>t.date>=cutoff).sort((a,b)=> a.date<b.date?1:-1).flatMap(t=>t.images||[]).filter(id=>!have.has(id)).slice(0, 24);
+    const recent = [...S.trades, ...S.missed, ...(S.plans||[])].filter(t=>t.date>=cutoff).sort((a,b)=> a.date<b.date?1:-1).flatMap(t=>t.images||[]).filter(id=>!have.has(id)).slice(0, 24);
     for(const id of recent) await imgDownload(id);
   }catch(e){}
   finally{ imgSyncBusy = false; if(UI.tab==='settings') paintImgCount(); }
@@ -3827,13 +4285,15 @@ async function gcImages(){
   try{
     const keep = referencedImages();
     if(UI.form && UI.form.images) UI.form.images.forEach(id=>keep.add(id));
+    if(UI.planForm && UI.planForm.images) UI.planForm.images.forEach(id=>keep.add(id));
     for(const id of await imgKeys()) if(!keep.has(id)){ await imgDelRec(id); await pendDel(id); }
   }catch(e){}
 }
 
 /* Add picked files to the open form */
 async function addFormImages(files){
-  const f = UI.form; if(!f) return;
+  const tgt = UI.imgTarget || 'before';
+  const f = tgt==='plan' ? UI.planForm : UI.form; if(!f) return;
   f.images = f.images || [];
   let list = [...files].filter(x=> /^image\//.test(x.type) || /\.(heic|heif|jpe?g|png|webp|gif)$/i.test(x.name));
   const room = IMG_MAX_PER_ENTRY - f.images.length;
@@ -3847,11 +4307,13 @@ async function addFormImages(files){
       await imgPutRec({ id, mime:c.mime, buf:c.buf, at:Date.now() });
       await pendAdd(id);
       f.images.push(id);
+      if(tgt==='after'){ f.afterIds = f.afterIds || []; f.afterIds.push(id); }
+      if(tgt==='plan') savePlanDraft(f);
     }catch(e){ toast('Couldn’t read '+(file.name||'that image')); }
     f.imgBusy--; rerenderForm(f);
   }
 }
-function rerenderForm(f){ if(UI.form===f && UI.tab==='add'){ const y = window.scrollY; renderAdd(); window.scrollTo({top:y}); } }
+function rerenderForm(f){ if((UI.form===f || UI.planForm===f) && UI.tab==='add'){ const y = window.scrollY; renderAdd(); window.scrollTo({top:y}); } }
 
 /* Fill <img data-img="id"> as they scroll into view */
 let imgIO = null;
