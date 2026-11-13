@@ -1,5 +1,5 @@
-const CACHE = 'tradetrackr-online-v10';
-const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './lightweight-charts.standalone.production.js'];
+const CACHE = 'tradetrackr-online-v11';
+const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
