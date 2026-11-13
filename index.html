@@ -805,6 +805,18 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:40}
   .shot-cols{grid-template-columns:1fr}
 }
 
+/* open trades */
+.open-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.open-strip{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;background:var(--s1);border:1px solid var(--gold-line);border-radius:var(--r-lg);color:var(--ink)}
+.open-strip:hover{border-color:var(--gold)}
+.live-dot{width:10px;height:10px;border-radius:50%;background:var(--gold);flex:none;box-shadow:0 0 0 0 rgba(227,181,79,.6);animation:liveDot 1.8s ease-out infinite}
+@keyframes liveDot{0%{box-shadow:0 0 0 0 rgba(227,181,79,.55)}80%,100%{box-shadow:0 0 0 9px rgba(227,181,79,0)}}
+.os-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.os-txt b{font-family:var(--disp);font-size:.9rem;font-weight:600;display:flex;align-items:center;gap:7px}
+.os-txt small{font-family:var(--mono);font-size:.7rem;color:var(--ink-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.open-hint{font-size:.72rem;color:var(--ink-faint);line-height:1.45;margin:8px 2px 0;text-align:center}
+.page-head + .open-wrap{margin-top:-4px}
+
 /* =====================================================================
    FX layer — type, HUD details, motion
    ===================================================================== */
@@ -1027,7 +1039,7 @@ function noteTemplate(){
   return t.endsWith('\n') ? t : t + '\n';
 }
 /* Lines the weekly report reads: warn if a custom template drops them */
-const TEMPLATE_KEY_LINES = [['Plan','entry, SL and TP'], ['Result','Best, Worst, exit and BE@'], ['After','what price did after an early exit']];
+const TEMPLATE_KEY_LINES = [['After','what price did after an early exit']];
 const templateMissing = t => TEMPLATE_KEY_LINES.filter(([k])=> !new RegExp('^\\s*'+k+'\\s*:', 'im').test(t));
 /* Plan written before the outcome? The form notes the time you finish typing the Plan line (entry + SL)
    and the Result line (exit price). Plan 5+ minutes before Result = Planned; same sitting = Hindsight. */
@@ -1056,7 +1068,7 @@ const MISSED_REASONS = [
 const reasonLabel = k => (MISSED_REASONS.find(r=>r[0]===k)||[null,'No type'])[1];
 
 function blankState(){
-  return { v:3, accounts:[], assets:[...DEFAULT_ASSETS], tags:[...DEFAULT_TAGS], tagGroups:{}, trades:[], missed:[], txns:[], plans:[], settings:{ defaultAccountId:null, defaultAsset:'XAUUSD', beThreshold:0, lastBackupAt:null, planRules:['Levels marked on the chart','News times checked','Coach focus read'] } };
+  return { v:3, accounts:[], assets:[...DEFAULT_ASSETS], tags:[...DEFAULT_TAGS], tagGroups:{}, trades:[], missed:[], txns:[], plans:[], openTrades:[], settings:{ defaultAccountId:null, defaultAsset:'XAUUSD', beThreshold:0, lastBackupAt:null, planRules:['Levels marked on the chart','News times checked','Coach focus read'] } };
 }
 /* Fill in anything an older or partial copy is missing. Returns null if it isn't a journal. */
 function normalize(d){
@@ -1070,6 +1082,9 @@ function normalize(d){
   if(!Array.isArray(d.missed)) d.missed = [];
   if(!Array.isArray(d.txns)) d.txns = [];
   /* Morning plans: one per day, not tied to an account */
+  if(!Array.isArray(d.openTrades)) d.openTrades = [];
+  d.openTrades = d.openTrades.filter(t=> t && typeof t==='object' && t.id);
+  d.openTrades.forEach(t=>{ ['layers','tags','images','afterIds'].forEach(k=>{ if(!Array.isArray(t[k])) t[k] = []; }); });
   if(!Array.isArray(d.plans)) d.plans = [];
   d.plans = d.plans.filter(p=> p && typeof p==='object' && typeof p.date==='string');
   d.plans.forEach(p=>{ ['assets','scenarios','checklist','images'].forEach(k=>{ if(!Array.isArray(p[k])) p[k] = []; }); });
@@ -1329,11 +1344,12 @@ function renderCalendar(){
     ${hbarsHTML(weeksArr.filter(w=>!(isCurrent && w.from > now.getDate())).map(w=>({label:'W'+w.no, full:'Week '+w.no+' · '+w.from+'–'+w.to+' '+mS, sub: w.n ? w.from+'–'+w.to+' '+mS : 'no trades', pnl:w.pnl, n:w.n, w:w.w})))}
   </div>` : '';
   el.innerHTML = head + (wide
-    ? `<div class="cal-layout"><div>${monthRow}<div class="cal-grid">${cells}</div>${legend}${hint}</div><div class="cal-side">${isCurrent ? planStripHTML() : ''}${coach}${summary}${extra}${glance}</div></div>`
-    : (isCurrent ? planStripHTML() : '') + coach + monthRow + summary + `<div class="cal-grid">${cells}</div>` + legend + hint + `<div class="cal-glance">${glance}</div>`);
+    ? `<div class="cal-layout"><div>${monthRow}<div class="cal-grid">${cells}</div>${legend}${hint}</div><div class="cal-side">${openStripHTML()}${isCurrent ? planStripHTML() : ''}${coach}${summary}${extra}${glance}</div></div>`
+    : openStripHTML() + (isCurrent ? planStripHTML() : '') + coach + monthRow + summary + `<div class="cal-grid">${cells}</div>` + legend + hint + `<div class="cal-glance">${glance}</div>`);
   fillCharts(el, {aid, y, m});
   const cm = el.querySelector('#coach-more'); if(cm) cm.onclick = openBriefsSheet;
   wirePlanStrip(el);
+  wireOpen(el);
 
   const calSel = el.querySelector('#cal-acct');
   if(calSel) calSel.onchange = e => { UI.statsAccountId = e.target.value; renderCalendar(); };
@@ -1731,6 +1747,73 @@ function wireQuickCheck(el, f){
     g.querySelectorAll('[data-v]').forEach(x=> x.classList.toggle('on', String(f[k])===x.dataset.v));
     saveDraft(f);
   });
+}
+
+/* ============================================================
+   OPEN TRADES — saved while you're still in the trade.
+   Kept in S.openTrades: never counted in stats, the calendar or the weekly
+   numbers until you close them with the PnL.
+   ============================================================ */
+const openList = () => [...(S.openTrades||[])].sort((a,b)=> whenTs(b)-whenTs(a));
+function openLine(t){
+  const pj = parseJournal(t);
+  return [pj.entry!==null ? 'entry '+pj.entry : '', pj.slPips!==null ? 'SL'+pj.slPips : '', pj.tpPips!==null ? 'TP'+pj.tpPips : '', t.date===todaySGT() ? (validTime(t.time) ? 'since '+t.time : 'today') : fmtDateShort(t.date)].filter(Boolean).join(' · ');
+}
+function openStripHTML(){
+  const L = openList(); if(!L.length) return '';
+  return `<div class="open-wrap">${L.map(t=>`<button class="open-strip" data-open="${esc(t.id)}"><span class="live-dot" aria-hidden="true"></span><span class="os-txt"><b>Open · ${esc(t.asset)} <span class="dir-badge ${t.direction}">${t.direction.toUpperCase()}</span></b><small>${esc(openLine(t))}${S.accounts.length>1 ? ' · '+esc((acct(t.accountId)||{}).name||'') : ''}</small></span><span class="ps-cta">Finish${I.chevR}</span></button>`).join('')}</div>`;
+}
+function finishOpen(id){
+  const t = (S.openTrades||[]).find(x=>x.id===id); if(!t) return;
+  UI.form = Object.assign(formFromTrade(t), { editingId:null, openId:t.id, kind:'taken', whenTouched:true });
+  UI.returnTo = null;
+  nav('add');
+}
+function wireOpen(root){ root.querySelectorAll('[data-open]').forEach(b=> b.onclick = ()=> finishOpen(b.dataset.open)); }
+function saveOpen(){
+  const f = UI.form; if(!f) return;
+  if(f.imgBusy) return toast('Wait for the screenshots to finish adding');
+  if(!f.accountId) return toast('Pick an account');
+  if(!f.asset) return toast('Pick an asset');
+  const layers = f.entries.filter(e=>e.str!=='' && !isNaN(parseFloat(e.str))).map(e=> e.sign*parseFloat(e.str));
+  const stamp = Date.now(), orig = f.openId ? (S.openTrades||[]).find(x=>x.id===f.openId) : null;
+  const rec = { id: orig ? orig.id : (f.openId || uid()), accountId: f.accountId, asset: f.asset, direction: f.direction, layers,
+    tags: [...(f.tags||[])], notes: (f.notes||'').trim(), date: f.date || todaySGT(), time: validTime(f.time) ? f.time : null,
+    images: [...(f.images||[])], afterIds: (f.afterIds||[]).filter(id=>(f.images||[]).includes(id)),
+    planAt: f.planAt||null, resultAt: f.resultAt||null, onPlan: f.onPlan||null, rulesOk: f.rulesOk||null, confidence: f.confidence||null,
+    createdAt: orig ? (orig.createdAt||stamp) : stamp, updatedAt: stamp };
+  S.openTrades = (S.openTrades||[]).filter(x=>x.id!==rec.id); S.openTrades.push(rec);
+  if(orig) forgetImages((orig.images||[]).filter(id=>!rec.images.includes(id)));
+  clearDraft(); save(); UI.form = null;
+  toast(orig ? 'Open trade updated' : 'Saved as open · finish it when you’re out');
+  nav('calendar');
+}
+function discardOpen(){
+  const f = UI.form; if(!f || !f.openId) return;
+  askSheet('Discard this open trade?', 'It was never counted, so your stats don’t change. Its notes and screenshots are removed.', 'Discard', ()=>{
+    const o = (S.openTrades||[]).find(x=>x.id===f.openId);
+    S.openTrades = (S.openTrades||[]).filter(x=>x.id!==f.openId);
+    if(o) forgetImages(o.images||[]);
+    clearDraft(); save(); UI.form = null; toast('Open trade discarded'); nav('calendar');
+  });
+}
+/* Template button: fill in the template's headings around what you've already written */
+function applyTemplate(notes, tpl){
+  const keyOf = l => { const m = String(l).match(/^\s*([A-Za-z]+)\s*:/); if(!m) return null; const k = m[1].toLowerCase(); return ({p:'plan', e:'result', pre:'before', post:'after', l:'lesson'})[k] || k; };
+  const nLines = String(notes).split('\n'), used = new Set(), out = [];
+  String(tpl).replace(/\n+$/,'').split('\n').forEach(tl=>{
+    const k = keyOf(tl);
+    const i = k===null ? -1 : nLines.findIndex((l,j)=> !used.has(j) && keyOf(l)===k);
+    if(i>=0){ used.add(i); out.push(nLines[i]); } else out.push(tl);
+  });
+  nLines.forEach((l,j)=>{
+    if(used.has(j) || !l.trim()) return;
+    const k = keyOf(l);
+    if(k==='plan') out.unshift(l);
+    else if(k==='result'){ const d = out.findIndex(x=>keyOf(x)==='during'); out.splice(d<0 ? out.length : d+1, 0, l); }
+    else out.push(l);
+  });
+  return out.join('\n') + '\n';
 }
 
 function renderStats(){
@@ -2731,6 +2814,11 @@ function renderAdd(){
   if(!acct(f.accountId)) f.accountId = defAcct().id;
   if(f.kind==='plan' && !f.editingId){ renderPlanEditor(el); return; }
   if(f.kind==='plan') f.kind = 'taken';
+  /* an open trade finished or discarded on another device */
+  if(f.openId && !(S.openTrades||[]).some(x=>x.id===f.openId)){
+    if(S.trades.some(x=>x.id===f.openId)){ clearDraft(); UI.form = blankForm(); return renderAdd(); }
+    f.openId = null;
+  }
   const net = calcNet(f);
   const editing = !!f.editingId;
   /* a new entry keeps "now" until you change the date or time yourself */
@@ -2739,10 +2827,11 @@ function renderAdd(){
   const missed = f.kind==='missed';
   const imgs = f.images || [];
   el.innerHTML = `
-  <div class="page-head"><div><h2>${editing ? (missed?'Edit log':'Edit trade') : 'New entry'}</h2><p>${editing?'Update the details below.':'Log it while the details are fresh.'}</p></div></div>
+  <div class="page-head"><div><h2>${f.openId ? 'Finish open trade' : editing ? (missed?'Edit log':'Edit trade') : 'New entry'}</h2><p>${f.openId ? 'Add the result and PnL, then close it.' : editing?'Update the details below.':'Log it while the details are fresh.'}</p></div></div>
+  ${!editing && !f.openId ? openStripHTML() : ''}
   ${editing ? '' : focusStripHTML()}
 
-  <div class="kind-seg ${editing?'':'three'}" role="group" aria-label="Entry type">
+  <div class="kind-seg ${editing?'':'three'}" ${f.openId?'hidden':''} role="group" aria-label="Entry type">
     <button data-kind="taken" class="${!missed?'on':''}" aria-pressed="${!missed}">${I.check}Taken</button>
     <button data-kind="missed" class="missed ${missed?'on':''}" aria-pressed="${missed}">${I.eye}Log</button>
     ${editing ? '' : `<button data-kind="plan" class="plan" aria-pressed="false">${I_SUN}Plan</button>`}
@@ -2780,7 +2869,7 @@ function renderAdd(){
     <button class="select-chip ghost" id="f-legend">${I.note}Legend</button>
     ${draftHasContent(f) ? `<button class="select-chip ghost" id="f-clear">${I.x}Clear</button>` : ''}
   </div>
-  <div class="field">${I.note}<textarea id="f-notes" placeholder="${missed?'What you saw, your plan, what price did after — tap Template to start':'Plan: 4289 SL30 TP60 — tap Template to start'}">${esc(f.notes)}</textarea></div>
+  <div class="field">${I.note}<textarea id="f-notes" placeholder="${missed?'What you saw, your plan, what price did after — tap Template to start':'Tap Template to add your headings'}">${esc(f.notes)}</textarea></div>
 
   <div class="section-label">Screenshots <span class="optional">· optional</span></div>
   <div class="shot-cols">
@@ -2811,7 +2900,10 @@ function renderAdd(){
     <div class="field">${I.clock}<input type="time" id="f-time" value="${esc(f.time||'')}" aria-label="Time (SGT)"></div>
   </div>
 
-  <button class="btn-primary" id="f-save">${I.check}${editing?'Save changes':(missed?'Save log':'Save trade')}</button>
+  <button class="btn-primary" id="f-save">${I.check}${f.openId ? 'Close & save trade' : editing?'Save changes':(missed?'Save log':'Save trade')}</button>
+  ${(!editing && !missed) ? `<button class="btn-soft" id="f-open" style="width:100%;margin-top:10px">${I.clock}${f.openId ? 'Update open trade' : 'Save as open trade'}</button>
+  <p class="open-hint">${f.openId ? 'Still in it? Update it and come back when you’re out.' : 'Still in the trade? Save the plan and screenshots now. It isn’t counted until you close it with the PnL.'}</p>` : ''}
+  ${f.openId ? `<button class="btn-danger-ghost" id="f-open-del">${I.trash}Discard open trade</button>` : ''}
   ${editing?`<button class="btn-danger-ghost" id="f-delete">${I.trash}${missed?'Delete entry':'Delete trade'}</button>`:''}
   </div></div>`;
 
@@ -2873,8 +2965,7 @@ function renderAdd(){
   el.querySelector('#f-time').onchange = e=>{ f.time = e.target.value || ''; f.whenTouched = true; saveDraft(f); };
   el.querySelector('#f-tpl').onclick = ()=>{
     const tpl = noteTemplate();
-    if(!f.notes.trim()) f.notes = tpl;
-    else if(!/^\s*(P|Plan)\s*:/im.test(f.notes)) f.notes = tpl + '\n' + f.notes;
+    f.notes = f.notes.trim() ? applyTemplate(f.notes, tpl) : tpl;
     renderAdd();
     setTimeout(()=>{ const t = document.getElementById('f-notes'); if(t){ t.focus(); t.setSelectionRange(6,6); } }, 40);
   };
@@ -2892,6 +2983,9 @@ function renderAdd(){
   wireJournalFields(el, f, ta, ()=>{ f.journalConfirmed = false; stampTimes(f); saveDraft(f); growTa(); });
   wireQuickCheck(el, f);
   el.querySelector('#f-save').onclick = saveTrade;
+  const fo = el.querySelector('#f-open'); if(fo) fo.onclick = saveOpen;
+  const fod = el.querySelector('#f-open-del'); if(fod) fod.onclick = discardOpen;
+  wireOpen(el);
   const delBtn = el.querySelector('#f-delete');
   if(delBtn) delBtn.onclick = ()=> confirmSheet(missed?'Delete this entry?':'Delete this trade?', missed?'This removes the log and its screenshots. This can\'t be undone.':'This removes it from your journal and stats. This can\'t be undone.',()=>{
     const dest = UI.returnTo||'history';
@@ -2934,18 +3028,24 @@ function saveTrade(){
   /* the entry may have been removed on another device while this form was open */
   const orig = f.editingId ? entryById(f.editingId) : null;
   const stamp = Date.now();
+  const openRec = (!orig && f.openId) ? (S.openTrades||[]).find(x=>x.id===f.openId) : null;
   const rec = {
-    id: orig ? orig.id : uid(),
+    id: orig ? orig.id : (f.openId || uid()),
     accountId: f.accountId, asset: f.asset, direction: f.direction,
     layers, tags: (missed && f.reason==='analysis') ? [] : (f.tags||[]), notes: f.notes.trim(), date: f.date || todaySGT(), time: validTime(f.time) ? f.time : null,
     images: [...(f.images||[])],
     planAt: f.planAt||null, resultAt: f.resultAt||null,
     onPlan: (!missed && planFor(f.date || todaySGT())) ? (f.onPlan||null) : null, rulesOk: missed ? null : (f.rulesOk||null), confidence: missed ? null : (f.confidence||null),
     afterIds: (f.afterIds||[]).filter(id=>(f.images||[]).includes(id)),
-    createdAt: orig ? (orig.createdAt || stamp) : stamp,
+    createdAt: orig ? (orig.createdAt || stamp) : (openRec ? (openRec.createdAt || stamp) : stamp),
     updatedAt: stamp
   };
   if(missed){ rec.missed = true; rec.reason = f.reason || null; }
+  if(!orig && f.openId){
+    S.trades = S.trades.filter(x=>x.id!==f.openId); S.missed = S.missed.filter(x=>x.id!==f.openId);
+    S.openTrades = (S.openTrades||[]).filter(x=>x.id!==f.openId);
+    if(openRec) forgetImages((openRec.images||[]).filter(id=>!rec.images.includes(id)));
+  }
   const fromArr = orig ? (orig.missed ? S.missed : S.trades) : null;
   const toArr = missed ? S.missed : S.trades;
   if(orig && fromArr===toArr) toArr[toArr.indexOf(orig)] = rec;
@@ -3043,6 +3143,7 @@ function renderHistory(){
     <button class="select-chip ${ftag==='all'?'on':''}" data-t="all">All tags</button>
     ${S.tags.map(tg=>`<button class="select-chip ${ftag===tg?'on':''}" data-t="${esc(tg)}">${esc(tg)}</button>`).join('')}
   </div>`:''}
+  ${hk==='trades' && (S.openTrades||[]).length ? `<div class="sub-head" style="margin-top:16px"><span>Open · not counted yet</span></div>${openStripHTML()}` : ''}
   ${histSum}
   ${listHtml}
   ${older>0?`<button class="btn-soft" id="h-more" style="width:100%;margin-top:8px">Show older · ${older} more ${hk==='missed'?'entr'+(older===1?'y':'ies'):'trade'+(older===1?'':'s')}</button>`:''}`;
@@ -3055,6 +3156,7 @@ function renderHistory(){
     };
   });
   el.querySelectorAll('[data-plan]').forEach(r=> r.onclick = ()=> openDaySheet(r.dataset.plan));
+  wireOpen(el);
   const more = el.querySelector('#h-more');
   if(more) more.onclick = ()=>{ const keep = window.scrollY; UI.historyLimit = (UI.historyLimit||150) + 150; renderHistory(); window.scrollTo({top:keep}); };
   el.querySelectorAll('.trade-row').forEach(r=> r.onclick = ()=>{
@@ -3154,7 +3256,7 @@ function renderSettings(){
 
   <div class="card-glass">
     <div class="card-title"><h3>Journal template</h3>${(typeof S.settings.noteTemplate==='string' && S.settings.noteTemplate.trim()) ? '<span class="badge">CUSTOM</span>' : ''}</div>
-    <p style="font-size:.78rem;color:var(--ink-dark-dim);margin-bottom:10px">What the Template button puts in your notes. One line per heading. Keep <b>Plan</b>, <b>Result</b> and <b>After</b>: the weekly report reads them.</p>
+    <p style="font-size:.78rem;color:var(--ink-dark-dim);margin-bottom:10px">What the Template button puts in your notes. One line per heading. The Plan and Result boxes on the trade form write those two lines for you, so you can leave them out. Keep <b>After</b>: the weekly report reads it.</p>
     <div class="field" style="background:var(--line);border-color:rgba(255,255,255,.1);align-items:flex-start">
       <textarea id="s-tpl" rows="9" spellcheck="false" aria-label="Journal template" style="min-height:190px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.82rem">${esc(noteTemplate())}</textarea>
     </div>
@@ -3210,7 +3312,8 @@ function renderSettings(){
     const n = S.trades.filter(t=>t.accountId===a.id).length;
     const nm = S.missed.filter(t=>t.accountId===a.id).length;
     confirmSheet(`Delete "${a.name}"?`, `This also deletes its ${n} trade${n===1?'':'s'}${nm?`, ${nm} log${nm===1?'':'s'}`:''} and all deposits/withdrawals. This can't be undone.`, ()=>{
-      forgetImages([...S.trades, ...S.missed].filter(t=>t.accountId===a.id).flatMap(t=>t.images||[]));
+      forgetImages([...S.trades, ...S.missed, ...(S.openTrades||[])].filter(t=>t.accountId===a.id).flatMap(t=>t.images||[]));
+      S.openTrades = (S.openTrades||[]).filter(t=>t.accountId!==a.id);
       S.accounts = S.accounts.filter(x=>x.id!==a.id);
       S.trades = S.trades.filter(t=>t.accountId!==a.id);
       S.missed = S.missed.filter(t=>t.accountId!==a.id);
@@ -3847,6 +3950,7 @@ async function exportWeekly(from, to, withShots){
       screenshots: shotNames(t, 'log')
     })),
     logsAllTimeByType: S.missed.reduce((o,t)=>{ const k = t.reason ? reasonLabel(t.reason) : '(no type)'; o[k] = (o[k]||0)+1; return o; }, {}),
+    openTradesNotCounted: (S.openTrades||[]).length,
     plansThisWeek: (S.plans||[]).filter(p=>p.date>=from && p.date<=to).sort((a,b)=>a.date<b.date?-1:1).map(p=>{ const dt = S.trades.filter(t=>t.date===p.date);
       return { date:p.date, watching:p.assets||[], levels:levelLines(p.levels), news:p.news||'', scenarios:p.scenarios||[], checklist:(p.checklist||[]).map(c=>(c.done?'[x] ':'[ ] ')+c.text),
         notes:p.notes||'', endOfDay:p.review||null, tradesThatDay:dt.length, pnlThatDay:r2(dt.reduce((s,t)=>s+tradePnl(t),0)), screenshots: shotNames(Object.assign({}, p, {asset:'plan', direction:'day'}), 'plan') }; }),
@@ -4006,7 +4110,7 @@ function badResponse(r){
   else setSyncStatus('error', 'Sync service error ('+r.status+'). It will retry.');
   return false;
 }
-const collectIds = d => { const out = []; ['accounts','trades','missed','txns','plans'].forEach(k=> (d[k]||[]).forEach(x=>{ if(x && x.id) out.push(k+':'+x.id); })); return out; };
+const collectIds = d => { const out = []; ['accounts','trades','missed','txns','plans','openTrades'].forEach(k=> (d[k]||[]).forEach(x=>{ if(x && x.id) out.push(k+':'+x.id); })); return out; };
 
 /* Combine the cloud copy with this device's copy.
    Same entry on both: the most recently edited one wins.
@@ -4015,7 +4119,7 @@ function mergeStates(remote, local, baseIdsArr){
   const out = normalize(JSON.parse(JSON.stringify(remote))) || blankState();
   const base = new Set(baseIdsArr||[]);
   const stamp = x => x.updatedAt || x.createdAt || 0;
-  ['accounts','trades','missed','txns','plans'].forEach(k=>{
+  ['accounts','trades','missed','txns','plans','openTrades'].forEach(k=>{
     const r = out[k]||[], l = local[k]||[];
     const lMap = new Map(l.map(x=>[x.id,x])), rIds = new Set(r.map(x=>x.id));
     const res = [];
@@ -4244,7 +4348,7 @@ function forgetImages(ids){
   });
   if(SM.key){ const q = delQueue(); ids.forEach(id=>{ if(!q.includes(id)) q.push(id); }); setDelQueue(q); imgSyncSoon(); }
 }
-const referencedImages = () => { const s = new Set(); [...S.trades, ...S.missed, ...(S.plans||[])].forEach(t=> (t.images||[]).forEach(id=>s.add(id))); return s; };
+const referencedImages = () => { const s = new Set(); [...S.trades, ...S.missed, ...(S.plans||[]), ...(S.openTrades||[])].forEach(t=> (t.images||[]).forEach(id=>s.add(id))); return s; };
 
 let imgSyncBusy = false, imgSyncTimer = null;
 function imgSyncSoon(){ clearTimeout(imgSyncTimer); imgSyncTimer = setTimeout(imgSync, 400); }
@@ -4267,7 +4371,7 @@ async function imgSync(){
     /* keep recent screenshots on this device so they open offline */
     const have = new Set(await imgKeys());
     const cutoff = new Date(Date.now() - 60*86400000).toISOString().slice(0,10);
-    const recent = [...S.trades, ...S.missed, ...(S.plans||[])].filter(t=>t.date>=cutoff).sort((a,b)=> a.date<b.date?1:-1).flatMap(t=>t.images||[]).filter(id=>!have.has(id)).slice(0, 24);
+    const recent = [...(S.openTrades||[]), ...S.trades, ...S.missed, ...(S.plans||[])].filter(t=>t.date>=cutoff).sort((a,b)=> a.date<b.date?1:-1).flatMap(t=>t.images||[]).filter(id=>!have.has(id)).slice(0, 24);
     for(const id of recent) await imgDownload(id);
   }catch(e){}
   finally{ imgSyncBusy = false; if(UI.tab==='settings') paintImgCount(); }
