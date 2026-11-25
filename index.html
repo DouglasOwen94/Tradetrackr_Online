@@ -1691,7 +1691,12 @@ function writeJournalLine(notes, kind, vals){
   const re = new RegExp('^(\\s*)'+(isPlan ? '(?:Plan|P)' : '(?:Result|E)')+'\\s*:(.*)$', 'im');
   const m = notes.match(re);
   let rest = m ? m[2] : '';
-  if(isPlan) rest = rest.replace(/(SL|TP)\s*\d+(?:\.\d+)?/ig,'').replace(/\d{3,}(?:\.\d+)?/, '');
+  if(isPlan){
+    rest = rest.replace(/(SL|TP)\s*\d+(?:\.\d*)?/ig,'');
+    // The entry is always written first, so drop the leading number whatever its length
+    // (partial entries like "1" or "12" while typing used to be left behind as junk).
+    rest = /^\s*\d/.test(rest) ? rest.replace(/^\s*\d+(?:\.\d*)?/, '') : rest.replace(/\d{3,}(?:\.\d*)?/, '');
+  }
   else rest = rest.replace(/Best\s*\+?\s*\d*(?:\.\d+)?/i,'').replace(/Worst\s*-?\s*\d*(?:\.\d+)?/i,'').replace(/\bout\s*@?\s*\d*(?:\.\d+)?/i,'').replace(/BE\s*@\s*\d*(?:\.\d+)?/i,'');
   rest = rest.replace(/\s+/g,' ').trim();
   const line = isPlan
