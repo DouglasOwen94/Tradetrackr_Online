@@ -1478,11 +1478,11 @@ function loadPlanForm(date){
   const ex = planFor(date);
   try{
     const d = JSON.parse(localStorage.getItem(PLAN_DRAFT_KEY)||'null');
-    if(d && d.date===date && (d.id||null)===(ex ? ex.id : null)) return d;
+    if(d && d.date===date && (d.id||null)===(ex ? ex.id : null)){ d.imgBusy = 0; return d; }
   }catch(e){}
   return ex ? JSON.parse(JSON.stringify(ex)) : blankPlan(date);
 }
-const savePlanDraft = p => { try{ localStorage.setItem(PLAN_DRAFT_KEY, JSON.stringify(p)); }catch(e){} };
+const savePlanDraft = p => { try{ localStorage.setItem(PLAN_DRAFT_KEY, JSON.stringify({...p, imgBusy:0})); }catch(e){} };
 const clearPlanDraft = () => { try{ localStorage.removeItem(PLAN_DRAFT_KEY); }catch(e){} };
 const planHasContent = p => !!(p && ((p.levels||'').trim() || (p.news||'').trim() || (p.notes||'').trim() || (p.images||[]).length || (p.scenarios||[]).some(s=>(s.if||'').trim()||(s.then||'').trim())));
 function openPlanEditor(date){
@@ -4414,7 +4414,7 @@ async function addFormImages(files){
   f.imgBusy = (f.imgBusy||0) + list.length; rerenderForm(f);
   for(const file of list){
     try{
-      const c = await compressImage(file);
+      const c = await Promise.race([compressImage(file), new Promise((_,rej)=> setTimeout(()=>rej(new Error('timeout')), 30000))]);
       const id = uid();
       await imgPutRec({ id, mime:c.mime, buf:c.buf, at:Date.now() });
       await pendAdd(id);
@@ -4422,7 +4422,7 @@ async function addFormImages(files){
       if(tgt==='after'){ f.afterIds = f.afterIds || []; f.afterIds.push(id); }
       if(tgt==='plan') savePlanDraft(f);
     }catch(e){ toast('Couldn’t read '+(file.name||'that image')); }
-    f.imgBusy--; rerenderForm(f);
+    finally{ f.imgBusy = Math.max(0, (f.imgBusy||0) - 1); rerenderForm(f); }
   }
 }
 function rerenderForm(f){ if((UI.form===f || UI.planForm===f) && UI.tab==='add'){ const y = window.scrollY; renderAdd(); window.scrollTo({top:y}); } }
